@@ -1,0 +1,27 @@
+# Java
+*.class
+*.jar
+*.war
+*.log
+target/
+
+# Vue
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.iml
