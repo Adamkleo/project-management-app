@@ -37,6 +37,10 @@ public class ProjectAssignment {
         return id;
     }
 
+    public void setId(AssignmentId id) {
+        this.id = id;
+    }
+
     public Project getProject() {
         return project;
     }

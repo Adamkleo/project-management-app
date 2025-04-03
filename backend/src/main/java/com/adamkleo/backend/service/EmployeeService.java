@@ -2,6 +2,7 @@ package com.adamkleo.backend.service;
 
 import com.adamkleo.backend.entity.Employee;
 import com.adamkleo.backend.exception.EmployeeAlreadyTerminatedException;
+import com.adamkleo.backend.exception.EmployeeAssignedException;
 import com.adamkleo.backend.exception.EmployeeNotFoundException;
 import com.adamkleo.backend.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
@@ -13,9 +14,11 @@ import java.util.List;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final AssignmentService assignmentService;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(EmployeeRepository employeeRepository, AssignmentService assignmentService) {
         this.employeeRepository = employeeRepository;
+        this.assignmentService = assignmentService;
     }
 
     public List<Employee> getActiveEmployees() {
@@ -36,6 +39,10 @@ public class EmployeeService {
 
         if (employee.getEndDate() != null) {
             throw new EmployeeAlreadyTerminatedException(id);
+        }
+
+        if (assignmentService.hasAssignedProject(id)) {
+            throw new EmployeeAssignedException(id);
         }
 
         employee.setEndDate(LocalDate.now());

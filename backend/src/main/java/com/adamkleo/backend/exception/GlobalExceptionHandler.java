@@ -60,5 +60,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404).body(ex.getMessage());
     }
 
+    @ExceptionHandler(EmployeeAssignedException.class)
+    public ResponseEntity<String> handleEmployeeAssigned(EmployeeAssignedException ex) {
+        return ResponseEntity.status(404).body(ex.getMessage());
+    }
 
 }

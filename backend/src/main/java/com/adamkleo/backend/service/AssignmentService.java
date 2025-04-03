@@ -71,6 +71,10 @@ public class AssignmentService {
         return assignmentRepository.existsByProjectId(projectId);
     }
 
+    public boolean hasAssignedProject(Integer employeeId) {
+        return assignmentRepository.existsByEmployeeId(employeeId);
+    }
+
     public boolean isEmployeeAssignedToAnyProject(Integer employeeId) {
         return assignmentRepository.existsByEmployeeId(employeeId);
     }

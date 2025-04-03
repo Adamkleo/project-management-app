@@ -116,6 +116,10 @@ public class Employee {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
 
     public LocalDate getBirthDate() {
         return birthDate;
