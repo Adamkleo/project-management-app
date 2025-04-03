@@ -5,7 +5,7 @@ It provides all necessary RESTful API endpoints for managing employees, projects
 
 ---
 
-## 📦 Technologies
+## Technologies
 
 - Java 17
 - Spring Boot 3
@@ -15,7 +15,7 @@ It provides all necessary RESTful API endpoints for managing employees, projects
 
 ---
 
-## 🗃️ Database Schema
+## Database Schema
 
 The schema includes three tables:
 
@@ -64,9 +64,9 @@ erDiagram
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
-### 👥 Employee Endpoints
+### Employee Endpoints
 
 | Method | Endpoint                  | Description                       |
 |--------|---------------------------|-----------------------------------|
@@ -77,7 +77,7 @@ erDiagram
 
 ---
 
-### 🧱 Project Endpoints
+### Project Endpoints
 
 | Method | Endpoint                   | Description                      |
 |--------|----------------------------|----------------------------------|
@@ -87,7 +87,7 @@ erDiagram
 
 ---
 
-### 🔗 Assignment Endpoints
+### Assignment Endpoints
 
 | Method | Endpoint                                                | Description                            |
 |--------|---------------------------------------------------------|----------------------------------------|
@@ -98,7 +98,7 @@ erDiagram
 
 ---
 
-## ⚠️ Error Handling
+## Error Handling
 
 Handled via a global exception handler. Returns meaningful `400`, `404`, and `409` errors, including:
 
@@ -112,15 +112,14 @@ Handled via a global exception handler. Returns meaningful `400`, `404`, and `40
 
 ---
 
-## 🔍 Notes
+## Notes and Improvements
 
-- The database must be created using the provided SQL script.
-- Table creation is handled manually; Hibernate does not auto-generate schema.
-- IDs are auto-incremented via MySQL (`AUTO_INCREMENT`).
+- The database must be created using the provided SQL script. Check if it is possible to have it created in a different way.
+- Unit tests
 
 ---
 
-## 🚀 Run the Backend
+## Run the Backend
 
 ```bash
 mvn spring-boot:run
@@ -130,7 +129,7 @@ Make sure MySQL is running and the schema `PRACTICA` exists.
 
 ---
 
-## ✅ Example JSON Payload (Add Employee)
+## Example JSON Payload (Add Employee)
 
 ```json
 {
@@ -150,12 +149,12 @@ Make sure MySQL is running and the schema `PRACTICA` exists.
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
+
+Tests are not yet implemented
 
 ```bash
 mvn test
 ```
-
-Unit tests use JUnit and Mockito. Some tests mock repository data to ensure isolation.
 
 ---
