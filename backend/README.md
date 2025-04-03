@@ -44,7 +44,7 @@ erDiagram
 
     PR_PROYECTOS {
         INT ID_PROYECTO PK
-        VARCHAR TX_DESCRIPCIÓN
+        VARCHAR TX_DESCRIPCION
         DATE F_INICIO
         DATE F_FIN
         DATE F_BAJA
@@ -60,7 +60,6 @@ erDiagram
 
     EM_EMPLEADOS ||--o{ PR_EMPLEADOS_PROYECTO : "ID_EMPLEADO"
     PR_PROYECTOS ||--o{ PR_EMPLEADOS_PROYECTO : "ID_PROYECTO"
-
 ```
 
 ---
