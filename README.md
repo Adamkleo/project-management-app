@@ -20,23 +20,9 @@
 
 ---
 
-## 1. Description
 
-The application consists of a web application whose main screen includes a menu to access the two available features:
 
-- Employee Management  
-- Project Management
-
----
-
-## 2. Preliminary Considerations
-
-This project will be based on all the concepts learned in the previous theoretical courses.  
-The database scripts required to create the necessary tables for the practice will be provided.
-
----
-
-## 3. Exercise Submission
+## Exercise Submission
 
 The final project must include the following deliverables:
 
@@ -47,7 +33,7 @@ The final project must include the following deliverables:
 
 ---
 
-## 4. Evaluation
+## Evaluation
 
 The project will be evaluated based on the following criteria:
 

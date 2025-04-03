@@ -1,0 +1,365 @@
+{
+	"info": {
+		"_postman_id": "cf0c9685-ff82-4370-8c8a-67bd756d07e3",
+		"name": "Project Management App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42530619"
+	},
+	"item": [
+		{
+			"name": "Create or Update Employee",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"nif\": \"12345678Z\",\n  \"firstName\": \"Luis\",\n  \"lastName1\": \"Gomez\",\n  \"lastName2\": \"Sanchez\",\n  \"birthDate\": \"1990-06-15\",\n  \"phone1\": \"600123456\",\n  \"phone2\": \"600654321\",\n  \"email\": \"luis@example.com\",\n  \"startDate\": \"2024-01-01\",\n  \"civilStatus\": \"S\",\n  \"universityEducation\": \"S\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/employees",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bulk Create or Update Employees",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n  {\n    \"id\": \"3\",\n    \"nif\": \"11111111A\",\n    \"firstName\": \"Carlos\",\n    \"lastName1\": \"Ruiz\",\n    \"lastName2\": \"Santos\",\n    \"birthDate\": \"1991-04-15\",\n    \"startDate\": \"2022-05-01\",\n    \"phone1\": \"622334455\",\n    \"phone2\": \"699998877\",\n    \"email\": \"carlos@example.com\",\n    \"civilStatus\": \"C\",\n    \"universityEducation\": \"S\"\n  },\n  {\n    \"id\": \"4\",\n    \"nif\": \"22222222B\",\n    \"firstName\": \"Elena\",\n    \"lastName1\": \"Molina\",\n    \"lastName2\": \"Díaz\",\n    \"birthDate\": \"1993-08-21\",\n    \"startDate\": \"2021-09-10\",\n    \"phone1\": \"633445566\",\n    \"phone2\": \"688887766\",\n    \"email\": \"elena@example.com\",\n    \"civilStatus\": \"S\",\n    \"universityEducation\": \"N\"\n  }\n]\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/employees/bulk",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"employees",
+						"bulk"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Employees",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/employees",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invalid Add User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"nif\": \"99999999Z\",\n  \"lastName1\": \"Test\",\n  \"lastName2\": \"User\",\n  \"birthDate\": \"1990-01-01\",\n  \"startDate\": \"2020-01-01\",\n  \"phone1\": \"600123456\",\n  \"phone2\": \"600654321\",\n  \"email\": \"test@example.com\",\n  \"civilStatus\": \"S\",\n  \"universityEducation\": \"S\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Terminate Employee",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/employees/2/terminate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"employees",
+						"2",
+						"terminate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Employees",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/employees",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Project",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"description\": \"Sistema de Gestión\",\n  \"startDate\": \"2024-01-10\",\n  \"endDate\": null,\n  \"location\": \"Madrid\",\n  \"observations\": \"Proyecto interno\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/projects",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"projects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Assign Employee To Project",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/assignments/1/assign/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"assignments",
+						"1",
+						"assign",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Assign Employee To Project",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/assignments/1/assign/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"assignments",
+						"1",
+						"assign",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reassign Same Employee",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/assignments/1/assign/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"assignments",
+						"1",
+						"assign",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Assignments By Project",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/assignments/project/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"assignments",
+						"project",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Assignments By Employee",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/assignments/employee/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"assignments",
+						"employee",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Terminating Projects with Assignments",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/projects/1/terminate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"projects",
+						"1",
+						"terminate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unassign Employee",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/assignments/1/unassign/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"assignments",
+						"1",
+						"unassign",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Assignments",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/assignments/project/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"assignments",
+						"project",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unassign Employee Copy",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/assignments/1/unassign/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"assignments",
+						"1",
+						"unassign",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
