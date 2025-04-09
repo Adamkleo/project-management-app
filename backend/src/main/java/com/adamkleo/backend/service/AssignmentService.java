@@ -75,7 +75,15 @@ public class AssignmentService {
         return assignmentRepository.existsByEmployeeId(employeeId);
     }
 
+    public List<ProjectAssignment> getAssignments() {
+        return assignmentRepository.findAll();
+    }
+
     public boolean isEmployeeAssignedToAnyProject(Integer employeeId) {
         return assignmentRepository.existsByEmployeeId(employeeId);
+    }
+
+    public List<ProjectAssignment> getActiveAssignments() {
+        return assignmentRepository.findAssignmentsOfActiveProjects();
     }
 }

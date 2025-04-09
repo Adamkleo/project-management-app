@@ -38,4 +38,14 @@ public class AssignmentController {
     public ResponseEntity<List<ProjectAssignment>> getAssignmentsByEmployee(@PathVariable Integer employeeId) {
         return ResponseEntity.ok(assignmentService.getAssignmentsByEmployee(employeeId));
     }
+
+    @GetMapping()
+    public ResponseEntity<List<ProjectAssignment>> getAssignments() {
+        return ResponseEntity.ok(assignmentService.getAssignments());
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<ProjectAssignment>> getAssignmentsActive() {
+        return ResponseEntity.ok(assignmentService.getActiveAssignments());
+    }
 }

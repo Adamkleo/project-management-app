@@ -24,7 +24,7 @@ const projectHeaders = ref([
 
 // --- Event Handlers ---
 const handleEditProject = async (project) => {
-    console.log("Editing project")
+    router.push(`/proyectos/assign/${project.id}`)
 }
 
 const handleTerminateProject = async (project) => {

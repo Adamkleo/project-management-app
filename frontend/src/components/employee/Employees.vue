@@ -50,8 +50,6 @@ async function handleTerminateEmployee(employee) {
 }
 
 
-
-
 // --- UPDATED: Navigate to the Add Employee form route ---
 function navigateToAddEmployee() {
     console.log('Parent: Navigating to Add New Employee form');

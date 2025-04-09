@@ -26,7 +26,7 @@ const props = defineProps({
   },
   buttonAction: { // Action to perform when the button is clicked
     type: Function,
-    default: () => {},
+    default: () => { },
   },
   titleIcon: { // Optional icon before the title
     type: String,
@@ -122,6 +122,18 @@ const props = defineProps({
     type: String,
     default: 'Loading... Please wait',
   },
+  showSelect: {
+    type: Boolean,
+    default: false,
+  },
+  showButton: {
+    type: Boolean,
+    default: true,
+  },
+  selected: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 // --- Emits ---
@@ -130,12 +142,14 @@ const emit = defineEmits([
   'delete-item',      // Emitted when the default delete icon is clicked -> (item)
   'update:options',   // Emitted when page, sort, or itemsPerPage changes (for server-side) -> (options)
   'update:search',    // Emitted when search term changes (useful for server-side search) -> (searchTerm)
+  'update:selected',  // Emitted when selected items change -> (selectedItems)
 ]);
 
 // --- Internal State ---
 const page = ref(1); // Current page number
 const internalSearch = ref(props.searchInitialValue); // Internal model for search field
 const itemsPerPageRef = ref(props.itemsPerPage); // Internal ref for itemsPerPage
+const internalSelected = ref(props.selected); // Internal ref for selected items
 
 // Sync internal search with prop changes (if parent controls it)
 watch(() => props.searchInitialValue, (newVal) => {
@@ -149,6 +163,15 @@ watch(() => props.itemsPerPage, (newVal) => {
   itemsPerPageRef.value = newVal;
 }, { immediate: true });
 
+// Sync internal selected with prop changes
+watch(() => props.selected, (newVal) => {
+  internalSelected.value = newVal;
+}, { immediate: true });
+
+// Watch for changes to internal selected and emit to parent
+watch(() => internalSelected.value, (newVal) => {
+  emit('update:selected', newVal);
+});
 
 // --- Computed Properties ---
 
@@ -227,15 +250,19 @@ function onSearchUpdate(value) {
           style="max-width: 300px;" @update:model-value="onSearchUpdate"></v-text-field>
 
         <slot name="title-append"></slot>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click=buttonAction> {{ buttonMsg }} </v-btn>
+
+        <v-btn v-if="showButton" color="primary" prepend-icon="mdi-plus" @click=buttonAction> {{ buttonMsg }} </v-btn>
       </v-card-title>
 
       <v-divider></v-divider>
 
       <v-data-table v-model:page="page" v-model:items-per-page="itemsPerPageRef" :headers="headers" :items="items"
         :items-length="serverTotalItems > 0 ? serverTotalItems : filteredItemsCount" :search="internalSearch"
-        :loading="loading" :loading-text="loadingText" :density="density" :hover="hover" :class="tableClass"
-        :items-per-page-options="itemsPerPageOptions" :server="server" @update:options="onOptionsUpdate">
+        :loading="loading" :loading-text="loadingText" :density="density" :show-select="showSelect" :hover="hover"
+        :class="tableClass" 
+        v-model:selected="internalSelected"
+        :items-per-page-options="itemsPerPageOptions" :server="server"
+        @update:options="onOptionsUpdate">
         <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
           <slot :name="slotName" v-bind="slotProps"></slot>
         </template>

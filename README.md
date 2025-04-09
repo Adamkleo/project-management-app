@@ -48,122 +48,16 @@ Extra points can be earned by completing the following tasks:
 - Adding improvements to any part of the application (search, sorting, pagination, visuals, additional stats...)  
 - Dockerizing any of the involved services (backend, frontend...)
 
+
+TODO:
+- Review frontend form validation
+
 ---
 
 ## 5. Exercises
 
-### 5.1 Employee Management
-
-#### 5.1.1 Employee Query
-
-The query screen will display the following fields (*) from the `EM_EMPLEADOS` table in an HTML table.  
-Only employees who are not terminated (`F_BAJA is null`) will be shown.
-
-- NIF  
-- First name  
-- First surname  
-- Second surname  
-- Birthdate  
-- Primary contact phone  
-- Email  
-- Marital status (Display values):  
-  - Single → Corresponds to `S` in the DB  
-  - Married → Corresponds to `C` in the DB  
-- University degree (Display values):  
-  - Yes → Corresponds to `S` in the DB  
-  - No → Corresponds to `N` in the DB  
-
-#### 5.1.2 Add New Employee
-
-The query screen includes an **Add Employee** button.
-
-When clicked, it navigates to the new employee form with the following fields (*):
-
-- NIF  
-- First name  
-- First surname  
-- Second surname  
-- Birthdate  
-- Hire date  
-- Primary contact phone  
-- Secondary contact phone  
-- Email  
-- Marital status dropdown:  
-  - Single → Saves as `S` in DB  
-  - Married → Saves as `C` in DB  
-- University degree dropdown:  
-  - Yes → Saves as `S` in DB  
-  - No → Saves as `N` in DB  
-
-Buttons:
-
-- **Accept**: Validates that all fields are filled. If any are missing, display:  
-  `'All fields are required to add a new employee'`  
-  If all fields are filled, insert into DB and return to the refreshed main screen.  
-- **Cancel**: Do not insert into DB and return to the previous screen.
-
-#### 5.1.3 Employee Termination
-
-In the query form, each employee row will have an X (❌) button to terminate the employee.
-
-When clicked:
-
-- Set `F_BAJA` to the system date  
-- Refresh the form so the employee no longer appears  
-
-Validation:
-
-If the employee is assigned to any projects, do not allow deletion and show the message:  
-`Cannot terminate employee FULL NAME because they are assigned to the following project(s): PROJECT DESCRIPTIONS (comma-separated)`
-
----
 
 ### 5.2 Project Management
-
-#### 5.2.1 Project Query
-
-The query form will display the following fields (*) from the `PR_PROYECTOS` table in multi-record mode. Only active projects (`F_BAJA is null`) will be shown:
-
-- Description  
-- Start date  
-- End date  
-- Location  
-
-#### 5.2.2 Add New Project
-
-The query form includes an **Add Project** button. When clicked, it navigates to a single-record form to insert a new project with the following fields (*):
-
-- Description  
-- Start date  
-- End date  
-- Location  
-- Observations  
-
-Buttons:
-
-- **Accept**: Validates that all fields are filled. If any are missing, display:  
-  `'All fields are required to add a new project'`  
-  If valid, insert into DB and return to the refreshed main screen.  
-  `ID_PROYECTO` is auto-incremental.  
-- **Cancel**: Do not insert into DB and return to the previous screen.
-
----
-
-### 5.3 Project Termination
-
-Each project row in the query form has an X (❌) button for termination.
-
-When clicked:
-
-- Set `F_BAJA` to system date  
-- Refresh the form so the project no longer appears  
-
-Validation:
-
-If any employees are assigned to the project, do not allow deletion and display:  
-`Cannot terminate project PROJECT DESCRIPTION because it has at least one assigned resource`
-
----
 
 ### 5.4 Assign Employees to Projects
 
