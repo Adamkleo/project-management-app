@@ -57,7 +57,6 @@ export const useProjectStore = defineStore('projects', {
     },
 
     async refreshData() {
-      console.log('Refreshing project data...');
       await this.fetchProjects();
     },
 

@@ -58,7 +58,6 @@ const projectFields = ref([
 
 // --- Submit Handler ---
 const handleProjectSubmit = async (formData) => {
-    console.log('Project submit handler received:', formData);
     isSubmitting.value = true;
 
     try {

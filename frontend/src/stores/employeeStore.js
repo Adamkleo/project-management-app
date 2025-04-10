@@ -84,9 +84,7 @@ export const useEmployeeStore = defineStore('employees', {
         const response = await apiClient.post('/employees', newEmployee);
         // Optionally push to state:
         this.employees.push(mapEmployee(response.data));
-        console.log('Employee added successfully:', response.data);
         // print employee
-        console.log('New Employee:', response.data);
       } catch (err) {
         console.error('Failed to add employee:', err);
         if (err.response) {
@@ -109,7 +107,6 @@ export const useEmployeeStore = defineStore('employees', {
       try {
         const response = await apiClient.put(`/employees/${employeeId}/terminate`);
         this.employees = this.employees.filter(emp => emp.id !== employeeId);
-        console.log('Employee unassigned successfully:', response.data);
       } catch (err) {
         if (err.response) {
           const status = err.response.status;

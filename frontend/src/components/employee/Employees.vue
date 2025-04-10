@@ -29,8 +29,6 @@ const employeeHeaders = ref([
 
 // --- Event Handlers ---
 function handleEditEmployee(employee) {
-    console.log('Parent: Edit Employee', employee);
-    // TODO: Navigate to an edit route, e.g., router.push(`/employees/edit/${employee.id}`);
 }
 
 
