@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import DynamicForm from '@/components/general/DynamicForm.vue'; 
-import { useEmployeeStore } from '@/stores/employeeStore'; 
+import DynamicForm from '@/components/general/DynamicForm.vue';
+import { useEmployeeStore } from '@/stores/employeeStore';
 
 // --- Import Validators ---
 import {
@@ -10,21 +10,9 @@ import {
     validateNIF,
     validatePhone,
     validateEmail,
-    validateDateYYYYMMDD 
-} from '@/utils/validators'; 
+    validateDateYYYYMMDD
+} from '@/utils/validators';
 
-
-// --- Props (This is needed if editing existing employees) ---
-const props = defineProps({
-    employeeId: { // Pass employee ID if editing
-        type: [String, Number],
-        default: null
-    },
-    initialData: { // Pre-fill form if editing
-        type: Object,
-        default: () => ({})
-    }
-});
 
 // --- Router and Store ---
 const router = useRouter();
@@ -38,13 +26,11 @@ const snackbarText = ref('');
 const snackbarColor = ref('success');
 
 // --- Computed properties ---
-const isEditing = computed(() => !!props.employeeId);
-const formTitle = computed(() => isEditing.value ? 'Editar Empleado' : 'Añadir Nuevo Empleado');
-// Use passed initialData if available (for editing), otherwise empty object for creation
-const initialEmployeeData = computed(() => isEditing.value ? props.initialData : {});
+const formTitle = computed(() => 'Añadir Nuevo Empleado');
+
 
 // --- Form Field Definitions for Employees ---
-// Use imported validators and new type/items for selects
+// (Field definitions remain the same)
 const employeeFields = ref([
     // Group 1: Personal Info
     { id: 'firstName', label: 'Nombre', validate: validateName, group: 1 },
@@ -53,15 +39,11 @@ const employeeFields = ref([
 
     // Group 2: IDs and Date
     { id: 'nif', label: 'NIF', validate: validateNIF, group: 2 },
-    // Assuming you might want a dedicated date picker component later,
-    // but for now, text field with validation and placeholder
     {
         id: 'birthDate',
         label: 'Fecha nacimiento',
         validate: (v) => validateDateYYYYMMDD(v) || 'Formato YYYY-MM-DD requerido',
         group: 2,
-        // You could add placeholder: 'YYYY-MM-DD' to the v-text-field directly if needed
-        // Or use a mask if using vuetify-mask or similar
     },
 
     // Group 3: Contact Info
@@ -87,7 +69,6 @@ const employeeFields = ref([
         validate: (v) => ['S', 'C'].includes(v) ? null : 'Debe seleccionar S (Soltero) o C (Casado)',
         group: 4
     },
-
     {
         id: 'universityEducation',
         label: 'Formación universitaria',
@@ -99,30 +80,18 @@ const employeeFields = ref([
         validate: (v) => ['S', 'N'].includes(v) ? null : 'Debe seleccionar S (Sí) o N (No)',
         group: 4
     },
-
-
-    // Example of a non-grouped field (would render full width)
-    // { id: 'notes', label: 'Notas Adicionales', type: 'textarea' } // Example for future enhancement
 ]);
 
 // --- Submit Handler ---
+// SIMPLIFIED: Removed the if/else logic for editing vs adding
 const handleEmployeeSubmit = async (formData) => {
     console.log('EmployeeForm submit handler received:', formData);
     isSubmitting.value = true;
 
     try {
-        if (isEditing.value) {
-            // OPTIONAL FOR EDITING 
-            // Call update action from store
-            // await employeeStore.updateEmployee(props.employeeId, formData); // Ensure this action exists
-            // console.log("UPDATE ACTION (needs implementation):", props.employeeId, formData); // Placeholder
-            // snackbarText.value = 'Empleado actualizado correctamente!';
-        } else {
-            // Call add action from store
-            await employeeStore.addEmployee(formData); // Ensure this action exists
-            snackbarText.value = 'Empleado añadido correctamente!';
-        }
-
+        // Always call the add action
+        await employeeStore.addEmployee(formData); // Ensure this action exists
+        snackbarText.value = 'Empleado añadido correctamente!'; // Updated text
         snackbarColor.value = 'success';
         showSnackbar.value = true;
 
@@ -135,8 +104,8 @@ const handleEmployeeSubmit = async (formData) => {
         }, 1500);
 
     } catch (error) {
-        console.error(`Error ${isEditing.value ? 'updating' : 'adding'} employee:`, error);
-        snackbarText.value = `Error al ${isEditing.value ? 'actualizar' : 'añadir'} empleado. ${error.message || ''}`;
+        console.error(`Error adding employee:`, error); // Updated text
+        snackbarText.value = `Error al añadir empleado. ${error.message || ''}`; // Updated text
         snackbarColor.value = 'error';
         showSnackbar.value = true;
     } finally {
@@ -145,11 +114,8 @@ const handleEmployeeSubmit = async (formData) => {
 };
 
 const handleCancel = () => {
-    router.push('/empleados'); 
+    router.push('/empleados');
 }
-
-
-
 </script>
 
 <template>
@@ -160,9 +126,14 @@ const handleCancel = () => {
             </v-card-title>
             <v-divider></v-divider>
             <v-card-text class="pa-5">
-                <DynamicForm :fields="employeeFields" :initial-data="initialEmployeeData" :loading="isSubmitting"
-                    submit-button-text="Guardar Empleado" @submit="handleEmployeeSubmit"
-                    @cancel="handleCancel" ref="employeeDynamicFormRef" />
+                <DynamicForm
+                    :fields="employeeFields"
+                    :loading="isSubmitting"
+                    submit-button-text="Guardar Empleado"
+                    @submit="handleEmployeeSubmit"
+                    @cancel="handleCancel"
+                    ref="employeeDynamicFormRef"
+                />
             </v-card-text>
 
             <v-snackbar v-model="showSnackbar" :color="snackbarColor" timeout="4000" location="top right">

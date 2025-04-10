@@ -1,8 +1,8 @@
 <script setup>
-import ProjectAssign from '@/components/project/ProjectAssign.vue';
+import ProjectAssignment from '@/components/project/ProjectAssignment.vue';
 </script>
 
 
 <template>
-    <ProjectAssign />
+    <ProjectAssignment />
 </template>

@@ -1,8 +1,7 @@
 <script setup>
-import Projects from '@/components/project/Projects.vue'; // Import the Projects component
+import Projects from '@/components/project/Projects.vue';
 </script>
 
-
 <template>
-    <Projects />
+  <Projects />
 </template>

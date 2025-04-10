@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <v-app-bar flat class="border-b" color="transparent" density="compact">
+    <v-app-bar flat class="border-b" density="compact">
         <template v-slot:prepend>
             <router-link to="/">
                 <v-img src="@/assets/fs_logo_full.png" alt="Logo" height="42" width="128" class="noselect ml-4 mr-2" contain />
@@ -27,7 +27,7 @@
             </v-btn>
 
             <v-btn variant="text" class="nav-item mx-2 font-weight-medium text-capitalize">
-                Services
+                Estatisticas
             </v-btn>
         </div>
 
