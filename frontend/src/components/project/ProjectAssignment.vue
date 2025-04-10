@@ -70,7 +70,7 @@ onMounted(async () => {
 // Process assignments to separate available and assigned employees
 const processAssignments = () => {
   // Get all assigned employee IDs
-  const assignedEmployeeIds = assignmentStore.projectAssignments.map(
+  const assignedEmployeeIds = assignmentStore.assignments.map(
     assignment => assignment.employee.id
   );
   
@@ -83,7 +83,7 @@ const processAssignments = () => {
     }));
   
   // Map assignments to include employee details
-  assignedEmployees.value = assignmentStore.projectAssignments.map(assignment => ({
+  assignedEmployees.value = assignmentStore.assignments.map(assignment => ({
     ...assignment.employee,
     name: `${assignment.employee.firstName} ${assignment.employee.lastName1} ${assignment.employee.lastName2}`
   }));

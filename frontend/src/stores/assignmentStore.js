@@ -44,7 +44,7 @@ export const useAssignmentStore = defineStore('assignments', {
       this.error = null;
 
       try {
-        const response = await apiClient.get(`/projects/${projectId}/assignments`);
+        const response = await apiClient.get(`/assignments/project/${projectId}`);
 
         if (Array.isArray(response.data)) {
           this.assignments = response.data;
@@ -74,28 +74,6 @@ export const useAssignmentStore = defineStore('assignments', {
       await this.fetchAssignments();
     },
 
-    async addAssignment(newAssignment) {
-      this.isLoading = true;
-      this.error = null;
-
-      try {
-        const response = await apiClient.post('/assignments', newAssignment);
-        this.assignments.push(response.data);
-      } catch (err) {
-        console.error('Failed to add assignment:', err);
-        if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || 'Failed to add assignment.'}`;
-        } else if (err.request) {
-          this.error = 'Network Error: Could not reach the server.';
-        } else {
-          this.error = `An unexpected error occurred: ${err.message}`;
-        }
-        throw err;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
     async terminateAssignment(assignmentId) {
       this.isLoading = true;
       this.error = null;
@@ -116,6 +94,56 @@ export const useAssignmentStore = defineStore('assignments', {
           this.error = `An unexpected error occurred: ${err.message}`;
           throw new Error(this.error);
         }
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async assignEmployeeToProject(projectId, employeeId) {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const response = await apiClient.post(`/assignments/${projectId}/assign/${employeeId}`);
+        
+        // Refresh the assignments list
+        await this.fetchProjectAssignments(projectId);
+        return response.data;
+      } catch (err) {
+        console.error('Failed to assign employee to project:', err);
+        if (err.response) {
+          this.error = `Error ${err.response.status}: ${err.response.data.message || 'Failed to assign employee.'}`;
+        } else if (err.request) {
+          this.error = 'Network Error: Could not reach the server.';
+        } else {
+          this.error = `An unexpected error occurred: ${err.message}`;
+        }
+        throw new Error(this.error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async unassignEmployeeFromProject(projectId, employeeId) {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const response = await apiClient.delete(`/assignments/${projectId}/unassign/${employeeId}`);
+        
+        // Refresh the assignments list
+        await this.fetchProjectAssignments(projectId);
+        return response.data;
+      } catch (err) {
+        console.error('Failed to unassign employee from project:', err);
+        if (err.response) {
+          this.error = `Error ${err.response.status}: ${err.response.data.message || 'Failed to unassign employee.'}`;
+        } else if (err.request) {
+          this.error = 'Network Error: Could not reach the server.';
+        } else {
+          this.error = `An unexpected error occurred: ${err.message}`;
+        }
+        throw new Error(this.error);
       } finally {
         this.isLoading = false;
       }

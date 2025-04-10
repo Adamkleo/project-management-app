@@ -63,15 +63,6 @@ const props = defineProps({
     type: Number,
     default: 7
   },
-  // Server-Side Operations
-  server: { // Set to true if pagination/sort/filter is handled server-side
-    type: Boolean,
-    default: false,
-  },
-  serverTotalItems: { // Required if server=true: Total items available on server for pagination
-    type: Number,
-    default: 0,
-  },
   // Action Buttons Configuration (only relevant if 'actions' key exists in headers)
   showActions: { // Whether to reserve space and potentially show default actions
     type: Boolean,
@@ -140,7 +131,6 @@ const props = defineProps({
 const emit = defineEmits([
   'edit-item',        // Emitted when the default edit icon is clicked -> (item)
   'delete-item',      // Emitted when the default delete icon is clicked -> (item)
-  'update:options',   // Emitted when page, sort, or itemsPerPage changes (for server-side) -> (options)
   'update:search',    // Emitted when search term changes (useful for server-side search) -> (searchTerm)
   'update:selected',  // Emitted when selected items change -> (selectedItems)
 ]);
@@ -175,20 +165,12 @@ watch(() => internalSelected.value, (newVal) => {
 
 // --- Computed Properties ---
 
-// Calculate total items count based on client/server mode (for internal display in footer)
+// Calculate filtered items count for search functionality
 const filteredItemsCount = computed(() => {
-  if (props.server) {
-    return props.serverTotalItems; // Use server total if provided
-  }
-  // Basic client-side filtering simulation for length calculation
   if (!internalSearch.value) {
     return props.items.length;
   }
-  // Note: This client-side filtering for count isn't perfect as v-data-table
-  // does its own internal filtering. It's an estimate.
-  // For accurate client-side count, v-data-table doesn't directly expose filtered count easily.
-  // Usually for client-side, you don't need items-length prop on v-data-table.
-  // We only need it for the pagination length calculation below.
+  // Basic client-side filtering for count calculation
   return props.items.filter(item =>
     Object.values(item).some(val =>
       String(val).toLowerCase().includes(internalSearch.value.toLowerCase())
@@ -198,34 +180,17 @@ const filteredItemsCount = computed(() => {
 
 // Calculate total number of pages for v-pagination
 const pageCount = computed(() => {
-  const itemsCount = props.server ? props.serverTotalItems : filteredItemsCount.value;
-  return Math.ceil(itemsCount / itemsPerPageRef.value);
+  return Math.ceil(filteredItemsCount.value / itemsPerPageRef.value);
 });
 
 // --- Methods ---
-
-// Handler for v-data-table's @update:options event
-function onOptionsUpdate(options) {
-  // If server-side operations are enabled, emit the event for the parent component
-  if (props.server) {
-    emit('update:options', options);
-  }
-  // Update internal refs based on options changes (relevant even for client-side)
-  page.value = options.page;
-  itemsPerPageRef.value = options.itemsPerPage;
-
-  // Note: Sorting updates (`options.sortBy`) are handled internally by v-data-table
-  // for client-side. For server-side, the emitted event includes sortBy.
-}
 
 // Handler for search input changes
 function onSearchUpdate(value) {
   // Always update internal model
   internalSearch.value = value;
   // Emit for parent if server-side filtering might be needed
-  if (props.server) {
-    emit('update:search', value);
-  }
+  emit('update:search', value);
   // Reset to page 1 when search changes (good practice for client-side)
   page.value = 1;
 }
@@ -257,12 +222,9 @@ function onSearchUpdate(value) {
       <v-divider></v-divider>
 
       <v-data-table v-model:page="page" v-model:items-per-page="itemsPerPageRef" :headers="headers" :items="items"
-        :items-length="serverTotalItems > 0 ? serverTotalItems : filteredItemsCount" :search="internalSearch"
-        :loading="loading" :loading-text="loadingText" :density="density" :show-select="showSelect" :hover="hover"
-        :class="tableClass" 
-        v-model:selected="internalSelected"
-        :items-per-page-options="itemsPerPageOptions" :server="server"
-        @update:options="onOptionsUpdate">
+        :search="internalSearch" :loading="loading" :loading-text="loadingText" :density="density" :show-select="showSelect" 
+        :hover="hover" :class="tableClass" v-model:selected="internalSelected"
+        :items-per-page-options="itemsPerPageOptions">
         <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
           <slot :name="slotName" v-bind="slotProps"></slot>
         </template>
