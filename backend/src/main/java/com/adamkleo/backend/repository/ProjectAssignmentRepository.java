@@ -22,5 +22,6 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
 
     boolean existsByEmployeeId(Integer employeeId);
 
-    void deleteByProjectIdAndEmployeeId(Integer projectId, Integer employeeId);
+
+
 }

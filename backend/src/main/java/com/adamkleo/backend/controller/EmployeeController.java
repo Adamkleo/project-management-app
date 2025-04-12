@@ -6,6 +6,10 @@ import com.adamkleo.backend.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.List;
 
@@ -23,6 +27,16 @@ public class EmployeeController {
     public List<Employee> getActiveEmployees() {
         return employeeService.getActiveEmployees();
     }
+
+    @GetMapping("/paginated")
+    public Page<Employee> getPaginatedActiveEmployees(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return employeeService.getActiveEmployees(pageable);
+    }
+
 
     @PostMapping
     public ResponseEntity<Employee> addEmployee(@RequestBody @Valid Employee employee) {
