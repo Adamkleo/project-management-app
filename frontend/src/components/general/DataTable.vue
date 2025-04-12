@@ -1,5 +1,4 @@
 <script setup>
-
 /* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
 /* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
 /* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
@@ -24,6 +23,10 @@ const props = defineProps({
   },
   loading: {
     // Controls the loading state indicator
+    type: Boolean,
+    default: false,
+  },
+  useBackendPagination: {
     type: Boolean,
     default: false,
   },
@@ -84,6 +87,11 @@ const props = defineProps({
     type: Number,
     default: 7,
   },
+  totalItems: {
+    type: Number,
+    default: 0,
+  },
+
   // Action Buttons Configuration (only relevant if 'actions' key exists in headers)
   showActions: {
     // Whether to reserve space and potentially show default actions
@@ -159,10 +167,13 @@ const emit = defineEmits([
   "delete-item", // Emitted when the default delete icon is clicked -> (item)
   "update:search", // Emitted when search term changes (useful for server-side search) -> (searchTerm)
   "update:selected", // Emitted when selected items change -> (selectedItems)
+  "pagination-change", //
 ]);
 
 // --- Internal State ---
-const page = ref(1); // Current page number
+const paginationPage = ref(1); // for backend pagination only
+const page = ref(1); // for frontend pagination
+
 const internalSearch = ref(props.searchInitialValue); // Internal model for search field
 const itemsPerPageRef = ref(props.itemsPerPage); // Internal ref for itemsPerPage
 const internalSelected = ref(props.selected); // Internal ref for selected items
@@ -176,6 +187,15 @@ watch(
     }
   }
 );
+
+watch([page, itemsPerPageRef], ([newPage, newSize]) => {
+  if (props.useBackendPagination) {
+    emit("pagination-change", {
+      page: newPage - 1, // backend is usually 0-indexed
+      size: newSize,
+    });
+  }
+});
 
 // Sync internal itemsPerPageRef with prop changes
 watch(
@@ -207,10 +227,14 @@ watch(
 
 // Calculate filtered items count for search functionality
 const filteredItemsCount = computed(() => {
+  if (props.useBackendPagination) {
+    return props.items.length; // backend already filtered
+  }
+
   if (!internalSearch.value) {
     return props.items.length;
   }
-  // Basic client-side filtering for count calculation
+
   return props.items.filter((item) =>
     Object.values(item).some((val) =>
       String(val).toLowerCase().includes(internalSearch.value.toLowerCase())
@@ -220,19 +244,21 @@ const filteredItemsCount = computed(() => {
 
 // Calculate total number of pages for v-pagination
 const pageCount = computed(() => {
-  return Math.ceil(filteredItemsCount.value / itemsPerPageRef.value);
+  return props.useBackendPagination
+    ? Math.ceil(props.totalItems / itemsPerPageRef.value)
+    : Math.ceil(filteredItemsCount.value / itemsPerPageRef.value);
 });
 
 // --- Methods ---
 
 // Handler for search input changes
 function onSearchUpdate(value) {
-  // Always update internal model
   internalSearch.value = value;
-  // Emit for parent if server-side filtering might be needed
   emit("update:search", value);
-  // Reset to page 1 when search changes (good practice for client-side)
-  page.value = 1;
+
+  if (!props.useBackendPagination) {
+    page.value = 1; // reset only for frontend
+  }
 }
 </script>
 
@@ -289,7 +315,12 @@ function onSearchUpdate(value) {
       <v-divider></v-divider>
 
       <v-data-table
-        v-model:page="page"
+        :page="useBackendPagination ? undefined : page"
+        @update:page="
+          (val) => {
+            if (!useBackendPagination) page = val;
+          }
+        "
         v-model:items-per-page="itemsPerPageRef"
         :headers="headers"
         :items="items"
@@ -346,10 +377,27 @@ function onSearchUpdate(value) {
           <slot name="bottom">
             <div class="text-center pt-2 pb-2">
               <v-pagination
+                v-if="useBackendPagination"
+                :model-value="paginationPage"
+                @update:model-value="
+                  (val) => {
+                    paginationPage = val;
+                    emit('pagination-change', {
+                      page: val - 1,
+                      size: itemsPerPageRef,
+                    });
+                  }
+                "
+                :length="pageCount"
+                :total-visible="paginationTotalVisible"
+              />
+
+              <v-pagination
+                v-else
                 v-model="page"
                 :length="pageCount"
                 :total-visible="paginationTotalVisible"
-              ></v-pagination>
+              />
             </div>
           </slot>
         </template>
@@ -358,11 +406,8 @@ function onSearchUpdate(value) {
   </v-container>
 </template>
 
-
 <style scoped>
-
 .v-card-title {
   padding: 12px 16px;
 }
-
 </style>

@@ -12,7 +12,7 @@ const employeeStore = useEmployeeStore();
 
 // Fetch employees when component is mounted
 onMounted(() => {
-  employeeStore.fetchEmployees();
+  employeeStore.fetchPaginatedEmployees({ page: 0, size: 10 });
 });
 
 // Las cabeceras necesarias para la tabla de empleados, es decir, los atributos de los empleados.
@@ -32,6 +32,13 @@ const employeeHeaders = ref([
   },
   { title: "Acciones", key: "actions", align: "end", sortable: false },
 ]);
+
+async function loadUsers({ page, size }) {
+  console.log("Requested page:", page, "size:", size);
+  await employeeStore.fetchPaginatedEmployees({ page, size });
+  console.log("Loaded employees:", employeeStore.employees);
+}
+
 
 // --- Dar de baja a un empleado usando su ID y la API a traves del store de empleados con Pinia ---
 async function handleTerminateEmployee(employee) {
@@ -86,10 +93,13 @@ function getStatusColor(status) {
         :server="false"
         :show-actions="true"
         :show-search="true"
+        :use-backend-pagination="true"
+        @pagination-change="loadUsers"
         :button-msg="'Añadir Empleado'"
         search-label="Filter Employees..."
         @delete-item="handleTerminateEmployee"
         :button-action="navigateToAddEmployee"
+        :total-items="employeeStore.totalEmployees"
       >
         <template #item.universityEducation="{ item }">
           <v-chip
