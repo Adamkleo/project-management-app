@@ -1,15 +1,17 @@
 // src/utils/validators.js
 
 export function validateNotBlank(value, fieldName = 'Este campo') {
-    return value ? null : `${fieldName} no puede estar vacío.`;
-}
+    return value ? true : `${fieldName} no puede estar vacío.`;
+  }
+  
 
 export function validateName(value) {
     if (!value) return 'El nombre es obligatorio.';
     if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(value)) return 'Solo letras y espacios.';
     if (value.length < 3 || value.length > 40) return 'Debe tener entre 3 y 40 caracteres.';
-    return null;
+    return true;
 }
+
 
 export function validateNIF(value) {
     return /^[0-9]{8}[A-HJ-NP-TV-Z]$/.test(value) ? null : 'NIF inválido.';

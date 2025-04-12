@@ -1,70 +1,92 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+
+/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
+/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
+/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
+/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
+/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
+/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
+
+import { ref, computed, watch } from "vue";
 
 // --- Props ---
 const props = defineProps({
   // Data and Configuration
-  items: { // The actual data rows to display
+  items: {
+    // The actual data rows to display
     type: Array,
     required: true,
   },
-  headers: { // Column definitions for v-data-table
+  headers: {
+    // Column definitions for v-data-table
     type: Array,
     required: true,
   },
-  loading: { // Controls the loading state indicator
+  loading: {
+    // Controls the loading state indicator
     type: Boolean,
     default: false,
   },
-  title: { // Text displayed in the card title
+  title: {
+    // Text displayed in the card title
     type: String,
-    default: 'Data Table',
+    default: "Data Table",
   },
-  buttonMsg: { // Text for the button in the title
+  buttonMsg: {
+    // Text for the button in the title
     type: String,
-    default: 'Add Item',
+    default: "Add Item",
   },
-  buttonAction: { // Action to perform when the button is clicked
+  buttonAction: {
+    // Action to perform when the button is clicked
     type: Function,
-    default: () => { },
+    default: () => {},
   },
-  titleIcon: { // Optional icon before the title
+  titleIcon: {
+    // Optional icon before the title
     type: String,
-    default: 'mdi-table',
+    default: "mdi-table",
   },
   // Search Feature
-  showSearch: { // Whether to display the search input field
+  showSearch: {
+    // Whether to display the search input field
     type: Boolean,
     default: true,
   },
-  searchLabel: { // Label for the search input field
+  searchLabel: {
+    // Label for the search input field
     type: String,
-    default: 'Search',
+    default: "Search",
   },
-  searchInitialValue: { // Initial value for the search field
+  searchInitialValue: {
+    // Initial value for the search field
     type: String,
-    default: ''
+    default: "",
   },
   // Pagination
-  itemsPerPage: { // Default items per page
+  itemsPerPage: {
+    // Default items per page
     type: Number,
     default: 10,
   },
-  itemsPerPageOptions: { // Options for the items per page dropdown
+  itemsPerPageOptions: {
+    // Options for the items per page dropdown
     type: Array,
     default: () => [
-      { value: 10, title: '10' },
-      { value: 25, title: '25' },
-      { value: 50, title: '50' },
-      { value: 100, title: '100' },
-    ]
+      { value: 10, title: "10" },
+      { value: 25, title: "25" },
+      { value: 50, title: "50" },
+      { value: 100, title: "100" },
+    ],
   },
-  paginationTotalVisible: { // Max pagination links to show
+  paginationTotalVisible: {
+    // Max pagination links to show
     type: Number,
-    default: 7
+    default: 7,
   },
   // Action Buttons Configuration (only relevant if 'actions' key exists in headers)
-  showActions: { // Whether to reserve space and potentially show default actions
+  showActions: {
+    // Whether to reserve space and potentially show default actions
     type: Boolean,
     default: false, // Default to false unless explicitly needed
   },
@@ -74,11 +96,11 @@ const props = defineProps({
   },
   editActionIcon: {
     type: String,
-    default: 'mdi-pencil'
+    default: "mdi-pencil",
   },
   editActionTooltip: {
     type: String,
-    default: 'Edit Item'
+    default: "Edit Item",
   },
   showDeleteAction: {
     type: Boolean,
@@ -86,32 +108,36 @@ const props = defineProps({
   },
   deleteActionIcon: {
     type: String,
-    default: 'mdi-delete'
+    default: "mdi-delete",
   },
   deleteActionColor: {
     type: String,
-    default: 'error'
+    default: "error",
   },
   deleteActionTooltip: {
     type: String,
-    default: 'Delete Item'
+    default: "Delete Item",
   },
   // Styling and Misc
-  density: { // Table density ('default', 'compact', 'comfortable')
+  density: {
+    // Table density ('default', 'compact', 'comfortable')
     type: String,
-    default: 'compact',
+    default: "compact",
   },
-  hover: { // Enable row hover effect
+  hover: {
+    // Enable row hover effect
     type: Boolean,
     default: true,
   },
-  tableClass: { // Additional CSS classes for the v-data-table
+  tableClass: {
+    // Additional CSS classes for the v-data-table
     type: [String, Array, Object],
-    default: 'elevation-1',
+    default: "elevation-1",
   },
-  loadingText: { // Text displayed during loading state
+  loadingText: {
+    // Text displayed during loading state
     type: String,
-    default: 'Loading... Please wait',
+    default: "Loading... Please wait",
   },
   showSelect: {
     type: Boolean,
@@ -129,10 +155,10 @@ const props = defineProps({
 
 // --- Emits ---
 const emit = defineEmits([
-  'edit-item',        // Emitted when the default edit icon is clicked -> (item)
-  'delete-item',      // Emitted when the default delete icon is clicked -> (item)
-  'update:search',    // Emitted when search term changes (useful for server-side search) -> (searchTerm)
-  'update:selected',  // Emitted when selected items change -> (selectedItems)
+  "edit-item", // Emitted when the default edit icon is clicked -> (item)
+  "delete-item", // Emitted when the default delete icon is clicked -> (item)
+  "update:search", // Emitted when search term changes (useful for server-side search) -> (searchTerm)
+  "update:selected", // Emitted when selected items change -> (selectedItems)
 ]);
 
 // --- Internal State ---
@@ -142,26 +168,40 @@ const itemsPerPageRef = ref(props.itemsPerPage); // Internal ref for itemsPerPag
 const internalSelected = ref(props.selected); // Internal ref for selected items
 
 // Sync internal search with prop changes (if parent controls it)
-watch(() => props.searchInitialValue, (newVal) => {
-  if (newVal !== internalSearch.value) {
-    internalSearch.value = newVal;
+watch(
+  () => props.searchInitialValue,
+  (newVal) => {
+    if (newVal !== internalSearch.value) {
+      internalSearch.value = newVal;
+    }
   }
-});
+);
 
 // Sync internal itemsPerPageRef with prop changes
-watch(() => props.itemsPerPage, (newVal) => {
-  itemsPerPageRef.value = newVal;
-}, { immediate: true });
+watch(
+  () => props.itemsPerPage,
+  (newVal) => {
+    itemsPerPageRef.value = newVal;
+  },
+  { immediate: true }
+);
 
 // Sync internal selected with prop changes
-watch(() => props.selected, (newVal) => {
-  internalSelected.value = newVal;
-}, { immediate: true });
+watch(
+  () => props.selected,
+  (newVal) => {
+    internalSelected.value = newVal;
+  },
+  { immediate: true }
+);
 
 // Watch for changes to internal selected and emit to parent
-watch(() => internalSelected.value, (newVal) => {
-  emit('update:selected', newVal);
-});
+watch(
+  () => internalSelected.value,
+  (newVal) => {
+    emit("update:selected", newVal);
+  }
+);
 
 // --- Computed Properties ---
 
@@ -171,8 +211,8 @@ const filteredItemsCount = computed(() => {
     return props.items.length;
   }
   // Basic client-side filtering for count calculation
-  return props.items.filter(item =>
-    Object.values(item).some(val =>
+  return props.items.filter((item) =>
+    Object.values(item).some((val) =>
       String(val).toLowerCase().includes(internalSearch.value.toLowerCase())
     )
   ).length;
@@ -190,53 +230,113 @@ function onSearchUpdate(value) {
   // Always update internal model
   internalSearch.value = value;
   // Emit for parent if server-side filtering might be needed
-  emit('update:search', value);
+  emit("update:search", value);
   // Reset to page 1 when search changes (good practice for client-side)
   page.value = 1;
 }
-
 </script>
 
-
 <template>
-  <v-container width="90%" fluid color>
-    <v-card :loading="loading" class="mx-auto">
+  <v-container
+    width="90%"
+    fluid
+    color
+  >
+    <v-card
+      :loading="loading"
+      class="mx-auto"
+    >
       <v-card-title class="d-flex align-center pe-2">
         <slot name="title-prepend">
-          <v-icon :icon="titleIcon" v-if="titleIcon"></v-icon> &nbsp;
+          <v-icon
+            :icon="titleIcon"
+            v-if="titleIcon"
+          ></v-icon>
+          &nbsp;
         </slot>
 
         {{ title }}
 
         <v-spacer></v-spacer>
 
-        <v-text-field v-if="showSearch" v-model="internalSearch" density="compact" :label="searchLabel"
-          prepend-inner-icon="mdi-magnify" variant="solo-filled" flat hide-details single-line class="me-2"
-          style="max-width: 300px;" @update:model-value="onSearchUpdate"></v-text-field>
+        <v-text-field
+          v-if="showSearch"
+          v-model="internalSearch"
+          density="compact"
+          :label="searchLabel"
+          prepend-inner-icon="mdi-magnify"
+          variant="solo-filled"
+          flat
+          hide-details
+          single-line
+          class="me-2"
+          style="max-width: 300px"
+          @update:model-value="onSearchUpdate"
+        ></v-text-field>
 
         <slot name="title-append"></slot>
 
-        <v-btn v-if="showButton" color="primary" prepend-icon="mdi-plus" @click=buttonAction> {{ buttonMsg }} </v-btn>
+        <v-btn
+          v-if="showButton"
+          color="primary"
+          prepend-icon="mdi-plus"
+          @click="buttonAction"
+        >
+          {{ buttonMsg }}
+        </v-btn>
       </v-card-title>
 
       <v-divider></v-divider>
 
-      <v-data-table v-model:page="page" v-model:items-per-page="itemsPerPageRef" :headers="headers" :items="items"
-        :search="internalSearch" :loading="loading" :loading-text="loadingText" :density="density" :show-select="showSelect" 
-        :hover="hover" :class="tableClass" v-model:selected="internalSelected"
-        :items-per-page-options="itemsPerPageOptions">
-        <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
-          <slot :name="slotName" v-bind="slotProps"></slot>
+      <v-data-table
+        v-model:page="page"
+        v-model:items-per-page="itemsPerPageRef"
+        :headers="headers"
+        :items="items"
+        :search="internalSearch"
+        :loading="loading"
+        :loading-text="loadingText"
+        :density="density"
+        :show-select="showSelect"
+        :hover="hover"
+        :class="tableClass"
+        v-model:selected="internalSelected"
+        :items-per-page-options="itemsPerPageOptions"
+      >
+        <template
+          v-for="(_, slotName) in $slots"
+          v-slot:[slotName]="slotProps"
+        >
+          <slot
+            :name="slotName"
+            v-bind="slotProps"
+          ></slot>
         </template>
 
-        <template v-if="showActions" v-slot:item.actions="{ item }">
-          <slot name="item.actions" :item="item">
-            <v-icon v-if="showEditAction" size="small" class="me-2" @click.stop="$emit('edit-item', item)"
-              :title="editActionTooltip">
+        <template
+          v-if="showActions"
+          v-slot:item.actions="{ item }"
+        >
+          <slot
+            name="item.actions"
+            :item="item"
+          >
+            <v-icon
+              v-if="showEditAction"
+              size="small"
+              class="me-2"
+              @click.stop="$emit('edit-item', item)"
+              :title="editActionTooltip"
+            >
               {{ editActionIcon }}
             </v-icon>
-            <v-icon v-if="showDeleteAction" size="small" :color="deleteActionColor"
-              @click.stop="$emit('delete-item', item)" :title="deleteActionTooltip">
+            <v-icon
+              v-if="showDeleteAction"
+              size="small"
+              :color="deleteActionColor"
+              @click.stop="$emit('delete-item', item)"
+              :title="deleteActionTooltip"
+            >
               {{ deleteActionIcon }}
             </v-icon>
           </slot>
@@ -245,22 +345,24 @@ function onSearchUpdate(value) {
         <template v-slot:bottom>
           <slot name="bottom">
             <div class="text-center pt-2 pb-2">
-              <v-pagination v-model="page" :length="pageCount" :total-visible="paginationTotalVisible"></v-pagination>
+              <v-pagination
+                v-model="page"
+                :length="pageCount"
+                :total-visible="paginationTotalVisible"
+              ></v-pagination>
             </div>
           </slot>
         </template>
-
       </v-data-table>
     </v-card>
   </v-container>
 </template>
 
 
-
 <style scoped>
-/* Add component-specific styles if needed */
+
 .v-card-title {
   padding: 12px 16px;
-  /* Example adjustment */
 }
+
 </style>

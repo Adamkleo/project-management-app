@@ -1,246 +1,266 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useProjectStore } from '@/stores/projectStore';
-import { useEmployeeStore } from '@/stores/employeeStore';
-import { useAssignmentStore } from '@/stores/assignmentStore';
-import DataTable from '@/components/general/DataTable.vue';
-import Swal from 'sweetalert2';
+import { ref, onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useProjectStore } from "@/stores/projectStore";
+import { useEmployeeStore } from "@/stores/employeeStore";
+import { useAssignmentStore } from "@/stores/assignmentStore";
+import DataTable from "@/components/general/DataTable.vue";
+import Swal from "sweetalert2";
 
 const route = useRoute();
 const router = useRouter();
+// Id del proyecto seleccionado
 const projectId = computed(() => parseInt(route.params.id));
 
-// Initialize stores
 const projectStore = useProjectStore();
 const employeeStore = useEmployeeStore();
 const assignmentStore = useAssignmentStore();
 
-// State
+// Estados: empleados desponibles y asignados a un proyecto
 const availableEmployees = ref([]);
 const assignedEmployees = ref([]);
+// Estado: El objeto del proyecto
 const project = ref(null);
 
-// Headers for the tables
-const availableEmployeesHeaders = ref([
-  { title: 'Nombre', key: 'name', align: 'start' },
-  { title: 'Acciones', key: 'actions', align: 'end', sortable: false }
-]);
+// Attributos de los empleados necesarios
+const employeeHeaders = [
+  { title: "Nombre", key: "name", align: "start" },
+  { title: "Acciones", key: "actions", align: "end", sortable: false },
+];
 
-const assignedEmployeesHeaders = ref([
-  { title: 'Nombre', key: 'name', align: 'start' },
-  { title: 'Acciones', key: 'actions', align: 'end', sortable: false }
-]);
+// Combinar el primer nombre y los dos apellidos del empleado
+const formatEmployeeName = (employee) =>
+  `${employee.firstName} ${employee.lastName1} ${employee.lastName2}`;
 
-// Load data when component is mounted
+/* SweetAlert Functions que estan utilizadas en varios sitios */
+
+// Funcion para mostrar error alert de sweetalert2 con on mensaje
+const showErrorAlert = (message) => {
+  Swal.fire({
+    icon: "error",
+    title: "Error",
+    text: message,
+  });
+};
+
+// Funcion para mostrar que un processo esta 'cargando' con un titulo
+const showLoadingSwal = (title) => {
+  Swal.fire({
+    title,
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+};
+
+// Cargar empleados y asignaciones
+const loadEmployeesAndAssignments = async () => {
+  /* Promise para cargar los dos antes de empezar
+   * En el caso que hay muchos empleados y poco asignaciones
+   * Uno puede terminar antes que el otro
+   * Es mejor si esperamos a los dos
+   */
+  await Promise.all([
+    employeeStore.fetchBasicEmployees(),
+    assignmentStore.fetchProjectAssignments(projectId.value),
+  ]);
+
+  // Processar asignaciones cuando se completa la carga
+  processAssignments();
+};
+
+// On mount
 onMounted(async () => {
   try {
-    // Fetch project details
+    // Fetch proyectos
     await projectStore.fetchProjects();
-    project.value = projectStore.projects.find(p => p.id === projectId.value);
-    
+    // Poner el objeto del proyecto
+    project.value = projectStore.projects.find((p) => p.id === projectId.value);
+
+    // Si no existe el proyecto, error, y volvemos a proyectos
     if (!project.value) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Proyecto no encontrado'
-      });
-      router.push('/proyectos');
+      showErrorAlert("Proyecto no encontrado");
+      router.push("/proyectos");
       return;
     }
-    
-    // Fetch all employees and assignments
-    await Promise.all([
-      employeeStore.fetchEmployees(),
-      assignmentStore.fetchProjectAssignments(projectId.value)
-    ]);
-    
-    // Process assignments to separate available and assigned employees
-    processAssignments();
+
+    // Cargar empleados y asignados
+    await loadEmployeesAndAssignments();
   } catch (error) {
-    console.error('Error loading data:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'No se pudo cargar los datos'
-    });
+    console.error("Error loading data:", error);
+    showErrorAlert("No se pudo cargar los datos");
   }
 });
 
-// Process assignments to separate available and assigned employees
+// Formatea un empleado añadiendo su nombre completo como propiedad 'name'
+function formatWithName(employee) {
+  return {
+    ...employee,
+    name: formatEmployeeName(employee),
+  };
+}
+
+// Filtra empleados que no están asignados
+function getAvailableEmployees(allEmployees, assignedIds) {
+  const available = [];
+
+  for (const employee of allEmployees) {
+    if (!assignedIds.includes(employee.id)) {
+      available.push(formatWithName(employee));
+    }
+  }
+
+  return available;
+}
+
+// Devuelve los empleados asignados con nombre formateado
+function getAssignedEmployees(assignments) {
+  const assigned = [];
+
+  for (const assignment of assignments) {
+    const employee = assignment.employee;
+    assigned.push(formatWithName(employee));
+  }
+
+  return assigned;
+}
+
+// Procesa la separación entre empleados disponibles y asignados
 const processAssignments = () => {
-  // Get all assigned employee IDs
-  const assignedEmployeeIds = assignmentStore.assignments.map(
-    assignment => assignment.employee.id
+  // Obtener los IDs de empleados ya asignados al proyecto
+  const assignedIds = assignmentStore.assignments.map((a) => a.employee.id);
+
+  // Obtener y guardar empleados disponibles
+  availableEmployees.value = getAvailableEmployees(
+    employeeStore.basicEmployees,
+    assignedIds
   );
-  
-  // Filter employees into available and assigned
-  availableEmployees.value = employeeStore.employees
-    .filter(employee => !assignedEmployeeIds.includes(employee.id))
-    .map(employee => ({
-      ...employee,
-      name: `${employee.firstName} ${employee.lastName1} ${employee.lastName2}`
-    }));
-  
-  // Map assignments to include employee details
-  assignedEmployees.value = assignmentStore.assignments.map(assignment => ({
-    ...assignment.employee,
-    name: `${assignment.employee.firstName} ${assignment.employee.lastName1} ${assignment.employee.lastName2}`
-  }));
+
+  // Obtener y guardar empleados asignados
+  assignedEmployees.value = getAssignedEmployees(assignmentStore.assignments);
 };
 
-// Handle assigning an employee to the project
+// Asignar empleado con el assignment store
 const handleAssignEmployee = async (employee) => {
   try {
-    // Show loading
-    Swal.fire({
-      title: 'Asignando empleado...',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-    
-    // Assign employee
+    showLoadingSwal("Asignando empleado...");
     await assignmentStore.assignEmployeeToProject(projectId.value, employee.id);
-    
-    // Refresh data
-    await Promise.all([
-      employeeStore.fetchEmployees(),
-      assignmentStore.fetchProjectAssignments(projectId.value)
-    ]);
-    
-    // Process assignments again
-    processAssignments();
-    
-    // Show success message
+    await loadEmployeesAndAssignments();
     Swal.fire({
-      icon: 'success',
-      title: 'Éxito',
-      text: 'Empleado asignado correctamente'
+      icon: "success",
+      title: "Éxito",
+      text: "Empleado asignado correctamente",
     });
   } catch (error) {
-    console.error('Error assigning employee:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: error.message || 'No se pudo asignar el empleado'
-    });
+    console.error("Error assigning employee:", error);
+    showErrorAlert(error.message || "No se pudo asignar el empleado");
   }
 };
 
-// Handle unassigning an employee from the project
+// Quitar empleado de un proyecto con el assignment store
 const handleUnassignEmployee = async (employee) => {
   try {
-    // Confirm unassignment
     const result = await Swal.fire({
-      icon: 'question',
-      title: 'Confirmar desasignación',
+      icon: "question",
+      title: "Confirmar desasignación",
       text: `¿Está seguro de desasignar a ${employee.name} del proyecto?`,
       showCancelButton: true,
-      confirmButtonText: 'Sí, desasignar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: "Sí, desasignar",
+      cancelButtonText: "Cancelar",
     });
-    
-    if (result.isConfirmed) {
-      // Show loading
-      Swal.fire({
-        title: 'Desasignando empleado...',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-      
-      // Unassign employee
-      await assignmentStore.unassignEmployeeFromProject(projectId.value, employee.id);
-      
-      // Refresh data
-      await Promise.all([
-        employeeStore.fetchEmployees(),
-        assignmentStore.fetchProjectAssignments(projectId.value)
-      ]);
-      
-      // Process assignments again
-      processAssignments();
-      
-      // Show success message
-      Swal.fire({
-        icon: 'success',
-        title: 'Éxito',
-        text: 'Empleado desasignado correctamente'
-      });
-    }
-  } catch (error) {
-    console.error('Error unassigning employee:', error);
+
+    if (!result.isConfirmed) return;
+
+    showLoadingSwal("Desasignando empleado...");
+    await assignmentStore.unassignEmployeeFromProject(
+      projectId.value,
+      employee.id
+    );
+    await loadEmployeesAndAssignments();
     Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: error.message || 'No se pudo desasignar el empleado'
+      icon: "success",
+      title: "Éxito",
+      text: "Empleado desasignado correctamente",
     });
+  } catch (error) {
+    console.error("Error unassigning employee:", error);
+    showErrorAlert(error.message || "No se pudo desasignar el empleado");
   }
 };
 
-// Navigate back to projects list
 const navigateBack = () => {
-  router.push('/proyectos');
+  router.push("/proyectos");
 };
 </script>
 
 <template>
-  <v-container fluid class="pa-8">
-      <v-card-title class="d-flex align-center">
-        <v-icon icon="mdi-arrow-left" class="me-2" @click="navigateBack"></v-icon>
-        <span>Asignación de Empleados - {{ project?.description || 'Cargando...' }}</span>
-      </v-card-title>
-      <v-card-text>
-        <v-row>
-          <v-col cols="12" md="6">
-              <v-card-title class="text-subtitle-1">
+  <v-container
+    fluid
+    class="pa-8"
+  >
+    <v-card-title class="d-flex align-center">
+      <v-icon
+        icon="mdi-arrow-left"
+        class="me-2"
+        @click="navigateBack"
+      ></v-icon>
+      <span
+        >Asignación de Empleados -
+        {{ project?.description || "Cargando..." }}</span
+      >
+    </v-card-title>
+    <v-card-text>
+      <v-row>
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-card-title class="text-subtitle-1"> </v-card-title>
+          <v-card-text>
+            <DataTable
+              :items="availableEmployees"
+              :headers="employeeHeaders"
+              :loading="employeeStore.isLoading || assignmentStore.isLoading"
+              :show-actions="true"
+              :title="'Empleados Disponibles'"
+              :show-search="true"
+              search-label="Buscar empleados disponibles..."
+              @edit-item="handleAssignEmployee"
+              :show-select="false"
+              :show-button="false"
+              edit-action-icon="mdi-arrow-right"
+              edit-action-tooltip="Asignar empleado"
+              :show-delete-action="false"
+            />
+          </v-card-text>
+        </v-col>
 
-              </v-card-title>
-              <v-card-text>
-                <DataTable 
-                  :items="availableEmployees" 
-                  :headers="availableEmployeesHeaders" 
-                  :loading="employeeStore.isLoading || assignmentStore.isLoading"
-                  :show-actions="true"
-                  :title="'Empleados Disponibles'"
-                  :show-search="true"
-                  search-label="Buscar empleados disponibles..."
-                  @edit-item="handleAssignEmployee"
-                  :show-select="false"
-                  :show-button="false"
-                  edit-action-icon="mdi-arrow-right"
-                  edit-action-tooltip="Asignar empleado"
-                  :show-delete-action="false"
-                />
-              </v-card-text>
-          </v-col>
-          
-          <v-col cols="12" md="6">
-              <v-card-title class="text-subtitle-1">
-              </v-card-title>
-              <v-card-text>
-                <DataTable 
-                  :items="assignedEmployees" 
-                  :headers="assignedEmployeesHeaders" 
-                  :loading="employeeStore.isLoading || assignmentStore.isLoading"
-                  :show-actions="true"
-                  :show-search="true"
-                  :title="'Empleados Asignados'"
-                  search-label="Buscar empleados asignados..."
-                  @delete-item="handleUnassignEmployee"
-                  :show-select="false"
-                  :show-button="false"
-                  :show-edit-action="false"
-                  delete-action-icon="mdi-arrow-left"
-                  delete-action-tooltip="Desasignar empleado"
-                />
-              </v-card-text>
-          </v-col>
-        </v-row>
-      </v-card-text>
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-card-title class="text-subtitle-1"> </v-card-title>
+          <v-card-text>
+            <DataTable
+              :items="assignedEmployees"
+              :headers="employeeHeaders"
+              :loading="employeeStore.isLoading || assignmentStore.isLoading"
+              :show-actions="true"
+              :show-search="true"
+              :title="'Empleados Asignados'"
+              search-label="Buscar empleados asignados..."
+              @delete-item="handleUnassignEmployee"
+              :show-select="false"
+              :show-button="false"
+              :show-edit-action="false"
+              delete-action-icon="mdi-arrow-left"
+              delete-action-tooltip="Desasignar empleado"
+            />
+          </v-card-text>
+        </v-col>
+      </v-row>
+    </v-card-text>
   </v-container>
 </template>
 
@@ -250,4 +270,4 @@ const navigateBack = () => {
   font-weight: bold;
   color: #333;
 }
-</style> 
+</style>

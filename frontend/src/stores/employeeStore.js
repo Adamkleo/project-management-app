@@ -17,6 +17,7 @@ export const useEmployeeStore = defineStore('employees', {
   // A function that returns the initial state object
   state: () => ({
     employees: [],      // Holds the list of employees
+    basicEmployees: [],   // DTO data
     isLoading: false,   // Tracks loading state
     error: null,        // Holds potential error messages (String | null)
   }),
@@ -127,7 +128,37 @@ export const useEmployeeStore = defineStore('employees', {
       } finally {
         this.isLoading = false;
       }
-    }
+    },
+    
+    async fetchBasicEmployees() {
+      this.isLoading = true;
+      this.error = null;
+    
+      try {
+        const response = await apiClient.get('/employees/basic');
+        
+        if (Array.isArray(response.data)) {
+          this.basicEmployees = response.data;
+        } else {
+          console.warn('API response for /employees/basic was not an array:', response.data);
+          this.basicEmployees = [];
+        }
+    
+      } catch (err) {
+        console.error('Failed to fetch basic employees:', err);
+        if (err.response) {
+          this.error = `Error ${err.response.status}: ${err.response.data.message || 'Failed to load basic employee data.'}`;
+        } else if (err.request) {
+          this.error = 'Network Error: Could not reach the server.';
+        } else {
+          this.error = `Unexpected error: ${err.message}`;
+        }
+        this.basicEmployees = [];
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
   },
       
 
