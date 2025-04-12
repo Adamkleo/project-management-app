@@ -1,5 +1,6 @@
 package com.adamkleo.backend.service;
 
+import com.adamkleo.backend.dto.EmployeeBasicDTO;
 import com.adamkleo.backend.entity.Employee;
 import com.adamkleo.backend.exception.EmployeeAlreadyTerminatedException;
 import com.adamkleo.backend.exception.EmployeeAssignedException;
@@ -8,6 +9,7 @@ import com.adamkleo.backend.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -49,5 +51,24 @@ public class EmployeeService {
         employeeRepository.save(employee);
     }
 
+    public EmployeeBasicDTO toBasicDto(Employee e) {
+        return new EmployeeBasicDTO(
+                e.getId(),
+                e.getFirstName(),
+                e.getLastName1(),
+                e.getLastName2()
+        );
+    }
+
+    public List<EmployeeBasicDTO> getAllBasicEmployees() {
+        List<Employee> employees = employeeRepository.findAll();
+        List<EmployeeBasicDTO> basicDTOs = new ArrayList<>();
+
+        for (Employee e : employees) {
+            basicDTOs.add(toBasicDto(e));
+        }
+
+        return basicDTOs;
+    }
 
 }

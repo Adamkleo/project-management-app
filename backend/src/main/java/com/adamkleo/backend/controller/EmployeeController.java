@@ -1,5 +1,6 @@
 package com.adamkleo.backend.controller;
 
+import com.adamkleo.backend.dto.EmployeeBasicDTO;
 import com.adamkleo.backend.entity.Employee;
 import com.adamkleo.backend.service.EmployeeService;
 import jakarta.validation.Valid;
@@ -39,5 +40,10 @@ public class EmployeeController {
     public ResponseEntity<Void> terminateEmployee(@PathVariable Integer id) {
         employeeService.terminateEmployee(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/basic")
+    public List<EmployeeBasicDTO> getBasicEmployees() {
+        return employeeService.getAllBasicEmployees();
     }
 }
