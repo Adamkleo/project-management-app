@@ -1,28 +1,17 @@
 <script setup>
-/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
-/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
-/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
-/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
-/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
-/* NEEDS COMMENTING DOCS AND STUFF AFTER FIXING / ADDING BACKEND PAGINATION */
-
 import { ref, computed, watch } from "vue";
 
-// --- Props ---
+// Props del componente
 const props = defineProps({
-  // Data and Configuration
   items: {
-    // The actual data rows to display
     type: Array,
     required: true,
   },
   headers: {
-    // Column definitions for v-data-table
     type: Array,
     required: true,
   },
   loading: {
-    // Controls the loading state indicator
     type: Boolean,
     default: false,
   },
@@ -31,49 +20,38 @@ const props = defineProps({
     default: false,
   },
   title: {
-    // Text displayed in the card title
     type: String,
     default: "Data Table",
   },
   buttonMsg: {
-    // Text for the button in the title
     type: String,
     default: "Add Item",
   },
   buttonAction: {
-    // Action to perform when the button is clicked
     type: Function,
     default: () => {},
   },
   titleIcon: {
-    // Optional icon before the title
     type: String,
     default: "mdi-table",
   },
-  // Search Feature
   showSearch: {
-    // Whether to display the search input field
     type: Boolean,
     default: true,
   },
   searchLabel: {
-    // Label for the search input field
     type: String,
     default: "Search",
   },
   searchInitialValue: {
-    // Initial value for the search field
     type: String,
     default: "",
   },
-  // Pagination
   itemsPerPage: {
-    // Default items per page
     type: Number,
     default: 10,
   },
   itemsPerPageOptions: {
-    // Options for the items per page dropdown
     type: Array,
     default: () => [
       { value: 10, title: "10" },
@@ -83,7 +61,6 @@ const props = defineProps({
     ],
   },
   paginationTotalVisible: {
-    // Max pagination links to show
     type: Number,
     default: 7,
   },
@@ -91,12 +68,9 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
-
-  // Action Buttons Configuration (only relevant if 'actions' key exists in headers)
   showActions: {
-    // Whether to reserve space and potentially show default actions
     type: Boolean,
-    default: false, // Default to false unless explicitly needed
+    default: false,
   },
   showEditAction: {
     type: Boolean,
@@ -126,59 +100,43 @@ const props = defineProps({
     type: String,
     default: "Delete Item",
   },
-  // Styling and Misc
   density: {
-    // Table density ('default', 'compact', 'comfortable')
     type: String,
     default: "compact",
   },
   hover: {
-    // Enable row hover effect
     type: Boolean,
     default: true,
   },
   tableClass: {
-    // Additional CSS classes for the v-data-table
     type: [String, Array, Object],
     default: "elevation-1",
   },
   loadingText: {
-    // Text displayed during loading state
     type: String,
     default: "Loading... Please wait",
-  },
-  showSelect: {
-    type: Boolean,
-    default: false,
   },
   showButton: {
     type: Boolean,
     default: true,
   },
-  selected: {
-    type: Array,
-    default: () => [],
-  },
 });
 
-// --- Emits ---
+// Eventos que emite el componente
 const emit = defineEmits([
-  "edit-item", // Emitted when the default edit icon is clicked -> (item)
-  "delete-item", // Emitted when the default delete icon is clicked -> (item)
-  "update:search", // Emitted when search term changes (useful for server-side search) -> (searchTerm)
-  "update:selected", // Emitted when selected items change -> (selectedItems)
-  "pagination-change", //
+  "edit-item",
+  "delete-item",
+  "update:search",
+  "pagination-change",
 ]);
 
-// --- Internal State ---
-const paginationPage = ref(1); // for backend pagination only
-const page = ref(1); // for frontend pagination
+// Estado interno
+const paginationPage = ref(1);
+const page = ref(1);
+const internalSearch = ref(props.searchInitialValue);
+const itemsPerPageRef = ref(props.itemsPerPage);
 
-const internalSearch = ref(props.searchInitialValue); // Internal model for search field
-const itemsPerPageRef = ref(props.itemsPerPage); // Internal ref for itemsPerPage
-const internalSelected = ref(props.selected); // Internal ref for selected items
-
-// Sync internal search with prop changes (if parent controls it)
+// Sincroniza la búsqueda si cambia desde el padre
 watch(
   () => props.searchInitialValue,
   (newVal) => {
@@ -188,16 +146,17 @@ watch(
   }
 );
 
+// Emitir evento cuando se cambia la paginación (solo si es backend)
 watch([page, itemsPerPageRef], ([newPage, newSize]) => {
   if (props.useBackendPagination) {
     emit("pagination-change", {
-      page: newPage - 1, // backend is usually 0-indexed
+      page: newPage - 1,
       size: newSize,
     });
   }
 });
 
-// Sync internal itemsPerPageRef with prop changes
+// Sincroniza el número de elementos por página si cambia desde el padre
 watch(
   () => props.itemsPerPage,
   (newVal) => {
@@ -206,29 +165,10 @@ watch(
   { immediate: true }
 );
 
-// Sync internal selected with prop changes
-watch(
-  () => props.selected,
-  (newVal) => {
-    internalSelected.value = newVal;
-  },
-  { immediate: true }
-);
-
-// Watch for changes to internal selected and emit to parent
-watch(
-  () => internalSelected.value,
-  (newVal) => {
-    emit("update:selected", newVal);
-  }
-);
-
-// --- Computed Properties ---
-
-// Calculate filtered items count for search functionality
+// Cálculo del total filtrado (solo para frontend)
 const filteredItemsCount = computed(() => {
   if (props.useBackendPagination) {
-    return props.items.length; // backend already filtered
+    return props.items.length;
   }
 
   if (!internalSearch.value) {
@@ -242,22 +182,20 @@ const filteredItemsCount = computed(() => {
   ).length;
 });
 
-// Calculate total number of pages for v-pagination
+// Cálculo del número total de páginas
 const pageCount = computed(() => {
   return props.useBackendPagination
     ? Math.ceil(props.totalItems / itemsPerPageRef.value)
     : Math.ceil(filteredItemsCount.value / itemsPerPageRef.value);
 });
 
-// --- Methods ---
-
-// Handler for search input changes
+// Al cambiar el campo de búsqueda
 function onSearchUpdate(value) {
   internalSearch.value = value;
   emit("update:search", value);
 
   if (!props.useBackendPagination) {
-    page.value = 1; // reset only for frontend
+    page.value = 1;
   }
 }
 </script>
@@ -328,10 +266,8 @@ function onSearchUpdate(value) {
         :loading="loading"
         :loading-text="loadingText"
         :density="density"
-        :show-select="showSelect"
         :hover="hover"
         :class="tableClass"
-        v-model:selected="internalSelected"
         :items-per-page-options="itemsPerPageOptions"
       >
         <template

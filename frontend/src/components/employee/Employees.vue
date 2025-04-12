@@ -34,9 +34,7 @@ const employeeHeaders = ref([
 ]);
 
 async function loadUsers({ page, size }) {
-  console.log("Requested page:", page, "size:", size);
   await employeeStore.fetchPaginatedEmployees({ page, size });
-  console.log("Loaded employees:", employeeStore.employees);
 }
 
 
