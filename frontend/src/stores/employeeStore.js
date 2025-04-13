@@ -1,7 +1,7 @@
-// src/stores/employeeStore.js
 import { defineStore } from "pinia";
-import apiClient from "@/plugins/axios"; // Import our configured Axios instance
+import apiClient from "@/plugins/axios"; // Cliente Axios configurado
 
+// Utilidad para traducir campos booleanos a texto legible
 function mapEmployee(employee) {
   return {
     ...employee,
@@ -11,121 +11,89 @@ function mapEmployee(employee) {
 }
 
 export const useEmployeeStore = defineStore("employees", {
-  // --- State ---
-  // A function that returns the initial state object
+  // --- Estado ---
   state: () => ({
-    employees: [],
-    basicEmployees: [],
-    isLoading: false,
-    error: null,
-    totalEmployees: 0,
-    totalPages: 0,
+    employees: [],            // Lista completa de empleados
+    basicEmployees: [],       // Lista básica (solo ID y nombre)
+    isLoading: false,         // Indicador de carga
+    error: null,              // Mensaje de error
+    totalEmployees: 0,        // Total de empleados (para paginación)
+    totalPages: 0,            // Total de páginas (para paginación)
   }),
-  
-  // --- Getters (Optional) ---
-  // Access state via the 'state' argument or 'this' (if not using arrow functions)
-  getters: {
-    // Example: Get the count of employees
-    employeeCount(state) {
-      return state.employees.length;
-    },
-    // Example: A simple boolean check if data is ready to be displayed
-    hasData(state) {
-      return !state.isLoading && !state.error && state.employees.length > 0;
-    },
-  },
 
-  // --- Actions ---
-  // Methods defined here can be asynchronous and access state/other actions via 'this'
+  // --- Acciones ---
   actions: {
+    // Obtener todos los empleados
     async fetchEmployees() {
-      this.isLoading = true; // Use 'this' to access state properties
+      this.isLoading = true;
       this.error = null;
 
       try {
-        // Make the GET request using our configured apiClient
-        const response = await apiClient.get("/employees"); // Same API call
+        const response = await apiClient.get("/employees");
 
-        // Basic validation remains important
         if (Array.isArray(response.data)) {
           this.employees = response.data.map(mapEmployee);
         } else {
-          console.warn(
-            "API response for /employees was not an array:",
-            response.data
-          );
+          console.warn("La respuesta de /employees no es un array:", response.data);
           this.employees = [];
-          // Optionally set an error specific to data format
-          // this.error = 'Received unexpected data format from server.';
         }
       } catch (err) {
-        console.error("Failed to fetch employees:", err);
-        // Improve error message based on actual error if possible
+        console.error("No se pudieron obtener los empleados:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${
-            err.response.data.message || "Failed to load data."
-          }`;
+          this.error = `Error ${err.response.status}: ${err.response.data.message || "No se pudieron cargar los datos."}`;
         } else if (err.request) {
-          this.error =
-            "Network Error: Could not reach the server. Please check your connection or the backend status.";
+          this.error = "Error de red: no se pudo contactar con el servidor. Verifica tu conexión o el estado del backend.";
         } else {
-          this.error = `An unexpected error occurred: ${err.message}`;
+          this.error = `Error inesperado: ${err.message}`;
         }
-        this.employees = []; // Clear data on error
+        this.employees = [];
       } finally {
-        this.isLoading = false; // Set loading false after request finishes
+        this.isLoading = false;
       }
     },
 
+    // Refrescar la lista de empleados
     async refreshData() {
-      console.log("Refreshing employee data...");
+      console.log("Actualizando los datos de empleados...");
       await this.fetchEmployees();
     },
 
+    // Añadir un nuevo empleado
     async addEmployee(newEmployee) {
       this.isLoading = true;
       this.error = null;
 
       try {
         const response = await apiClient.post("/employees", newEmployee);
-        // Optionally push to state:
         this.employees.push(mapEmployee(response.data));
-        // print employee
       } catch (err) {
-        console.error("Failed to add employee:", err);
+        console.error("No se pudo añadir el empleado:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${
-            err.response.data.message || "No se pudo añadir el empleado."
-          }`;
+          this.error = `Error ${err.response.status}: ${err.response.data.message || "No se pudo añadir el empleado."}`;
         } else if (err.request) {
           this.error = "Error de red: no se pudo conectar al servidor.";
         } else {
           this.error = `Error inesperado: ${err.message}`;
         }
-        throw err; // Re-throw so UI can handle it
+        throw err;
       } finally {
         this.isLoading = false;
       }
     },
 
+    // Terminar (desactivar) un empleado
     async terminateEmployee(employeeId) {
       this.isLoading = true;
       this.error = null;
 
       try {
-        const response = await apiClient.put(
-          `/employees/${employeeId}/terminate`
-        );
+        await apiClient.put(`/employees/${employeeId}/terminate`);
         this.employees = this.employees.filter((emp) => emp.id !== employeeId);
       } catch (err) {
         if (err.response) {
           const status = err.response.status;
-          const msg = err.response.data || "No se pudo desasignar el empleado.";
-
-          // Store the message if needed
+          const msg = err.response.data || "No se pudo desactivar el empleado.";
           this.error = `Error ${status}: ${msg}`;
-
-          // Optional: Re-throw for the frontend component to handle it
           throw new Error(msg);
         } else if (err.request) {
           this.error = "Error de red: no se pudo conectar al servidor.";
@@ -139,6 +107,7 @@ export const useEmployeeStore = defineStore("employees", {
       }
     },
 
+    // Obtener lista básica de empleados (usado por selects)
     async fetchBasicEmployees() {
       this.isLoading = true;
       this.error = null;
@@ -149,22 +118,17 @@ export const useEmployeeStore = defineStore("employees", {
         if (Array.isArray(response.data)) {
           this.basicEmployees = response.data;
         } else {
-          console.warn(
-            "API response for /employees/basic was not an array:",
-            response.data
-          );
+          console.warn("La respuesta de /employees/basic no es un array:", response.data);
           this.basicEmployees = [];
         }
       } catch (err) {
-        console.error("Failed to fetch basic employees:", err);
+        console.error("No se pudieron obtener los empleados básicos:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${
-            err.response.data.message || "Failed to load basic employee data."
-          }`;
+          this.error = `Error ${err.response.status}: ${err.response.data.message || "No se pudo cargar la lista básica de empleados."}`;
         } else if (err.request) {
-          this.error = "Network Error: Could not reach the server.";
+          this.error = "Error de red: no se pudo contactar con el servidor.";
         } else {
-          this.error = `Unexpected error: ${err.message}`;
+          this.error = `Error inesperado: ${err.message}`;
         }
         this.basicEmployees = [];
       } finally {
@@ -172,6 +136,7 @@ export const useEmployeeStore = defineStore("employees", {
       }
     },
 
+    // Obtener empleados paginados
     async fetchPaginatedEmployees({ page = 0, size = 10 } = {}) {
       this.isLoading = true;
       this.error = null;
@@ -186,26 +151,20 @@ export const useEmployeeStore = defineStore("employees", {
         if (Array.isArray(content)) {
           this.employees = content.map(mapEmployee);
         } else {
-          console.warn(
-            "Paginated API response had unexpected format:",
-            response.data
-          );
+          console.warn("El formato de respuesta de paginación es inesperado:", response.data);
           this.employees = [];
         }
 
-        // Optionally store total for pagination controls in UI
         this.totalEmployees = totalElements;
         this.totalPages = totalPages;
       } catch (err) {
-        console.error("Failed to fetch paginated employees:", err);
+        console.error("No se pudieron obtener los empleados paginados:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${
-            err.response.data.message || "Failed to load data."
-          }`;
+          this.error = `Error ${err.response.status}: ${err.response.data.message || "No se pudieron cargar los datos paginados."}`;
         } else if (err.request) {
-          this.error = "Network Error: Could not reach the server.";
+          this.error = "Error de red: no se pudo contactar con el servidor.";
         } else {
-          this.error = `Unexpected error: ${err.message}`;
+          this.error = `Error inesperado: ${err.message}`;
         }
         this.employees = [];
       } finally {

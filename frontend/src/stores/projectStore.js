@@ -1,103 +1,90 @@
-// src/stores/Projectstore.js
 import { defineStore } from 'pinia';
-import apiClient from '@/plugins/axios'; // Import our configured Axios instance
-
-
-
+import apiClient from '@/plugins/axios'; // Cliente Axios configurado
 
 export const useProjectStore = defineStore('projects', {
-  // --- State ---
-  // A function that returns the initial state object
+  // --- Estado ---
   state: () => ({
-    projects: [],      // Holds the list of projects
-    isLoading: false,   // Tracks loading state
-    error: null,        // Holds potential error messages (String | null)
+    projects: [],       // Lista de proyectos obtenidos del backend
+    isLoading: false,   // Estado de carga (para spinners o deshabilitar acciones)
+    error: null,        // Mensaje de error si ocurre un fallo
   }),
 
-  // --- Getters  ---
-  // Can be added but not really needed as of the time of writing this
-  getters: {
-
-  },
-
-  // --- Actions ---
-  // Methods defined here can be asynchronous and access state/other actions via 'this'
+  // --- Acciones ---
   actions: {
+    // Obtener todos los proyectos
     async fetchProjects() {
-      this.isLoading = true; // Use 'this' to access state properties
+      this.isLoading = true;
       this.error = null;
 
       try {
-        // Make the GET request using our configured apiClient
-        const response = await apiClient.get('/projects'); // Same API call
+        const response = await apiClient.get('/projects');
 
-        // Basic validation remains important
         if (Array.isArray(response.data)) {
           this.projects = response.data;
         } else {
-          console.warn('API response for /projects was not an array:', response.data);
+          console.warn('La respuesta de la API para /projects no es un array:', response.data);
           this.projects = [];
-          this.error = 'Received unexpected data format from server.';
+          this.error = 'El servidor devolvió un formato de datos inesperado.';
           throw new Error(this.error);
         }
 
       } catch (err) {
-        console.error('Failed to fetch projects:', err);
+        console.error('No se pudieron obtener los proyectos:', err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || 'Failed to load data.'}`;
+          this.error = `Error ${err.response.status}: ${err.response.data.message || 'No se pudieron cargar los datos.'}`;
         } else if (err.request) {
-          this.error = 'Network Error: Could not reach the server. Please check your connection or the backend status.';
+          this.error = 'Error de red: no se pudo contactar con el servidor. Verifica tu conexión o el estado del backend.';
         } else {
-          this.error = `An unexpected error occurred: ${err.message}`;
+          this.error = `Error inesperado: ${err.message}`;
         }
-        this.projects = []; // Clear data on error
+        this.projects = [];
       } finally {
-        this.isLoading = false; // Set loading false after request finishes
+        this.isLoading = false;
       }
     },
 
+    // Refrescar los datos de proyectos (vuelve a llamarse fetchProjects)
     async refreshData() {
       await this.fetchProjects();
     },
 
+    // Añadir un nuevo proyecto
     async addProject(newProject) {
       this.isLoading = true;
       this.error = null;
 
       try {
         const response = await apiClient.post('/projects', newProject);
-        // Optionally push to state:
-        this.projects.push(response.data);
+        this.projects.push(response.data); // Agregar el nuevo proyecto a la lista local
       } catch (err) {
-        console.error('Failed to add project:', err);
+        console.error('No se pudo añadir el proyecto:', err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || 'No se pudo añadir el empleado.'}`;
+          this.error = `Error ${err.response.status}: ${err.response.data.message || 'No se pudo añadir el proyecto.'}`;
         } else if (err.request) {
           this.error = 'Error de red: no se pudo conectar al servidor.';
         } else {
           this.error = `Error inesperado: ${err.message}`;
         }
-        throw err; // Re-throw so UI can handle it
+        throw err;
       } finally {
         this.isLoading = false;
       }
     },
 
+    // Terminar (finalizar) un proyecto por su ID
     async terminateProject(ProjectId) {
       this.isLoading = true;
       this.error = null;
 
       try {
-        const response = await apiClient.put(`/projects/${ProjectId}/terminate`);
+        await apiClient.put(`/projects/${ProjectId}/terminate`);
         this.projects = this.projects.filter(emp => emp.id !== ProjectId);
-        // Optional: Console log sucessful operation using response msg
+        // Se elimina el proyecto de la lista local
       } catch (err) {
         if (err.response) {
           const status = err.response.status;
-          const msg = err.response.data || 'No se pudo desasignar el empleado.';
-          // Store the message if needed
+          const msg = err.response.data || 'No se pudo finalizar el proyecto.';
           this.error = `Error ${status}: ${msg}`;
-          // Re-throw for the frontend component to handle it
           throw new Error(msg);
         } else if (err.request) {
           this.error = 'Error de red: no se pudo conectar al servidor.';
@@ -111,6 +98,4 @@ export const useProjectStore = defineStore('projects', {
       }
     }
   },
-
-
 });
