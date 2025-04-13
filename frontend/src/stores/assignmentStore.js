@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia';
-import apiClient from '@/plugins/axios';
+import { defineStore } from "pinia";
+import apiClient from "@/plugins/axios";
 
 // Definimos el store de asignaciones
-export const useAssignmentStore = defineStore('assignments', {
+export const useAssignmentStore = defineStore("assignments", {
   state: () => ({
     // Lista de asignaciones cargadas desde el backend
     assignments: [],
@@ -19,23 +19,29 @@ export const useAssignmentStore = defineStore('assignments', {
       this.error = null;
 
       try {
-        const response = await apiClient.get('/assignments');
+        const response = await apiClient.get("/assignments");
 
         // Verificamos que la respuesta sea un array
         if (Array.isArray(response.data)) {
           this.assignments = response.data;
         } else {
-          console.warn('La respuesta de la API para /assignments no tiene el formato esperado:', response.data);
+          console.warn(
+            "La respuesta de la API para /assignments no tiene el formato esperado:",
+            response.data
+          );
           this.assignments = [];
-          this.error = 'El servidor devolvió un formato de datos inesperado.';
+          this.error = "El servidor devolvió un formato de datos inesperado.";
           throw new Error(this.error);
         }
       } catch (err) {
-        console.error('No se pudieron obtener las asignaciones:', err);
+        console.error("No se pudieron obtener las asignaciones:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || 'Error al cargar los datos.'}`;
+          this.error = `Error ${err.response.status}: ${
+            err.response.data.message || "Error al cargar los datos."
+          }`;
         } else if (err.request) {
-          this.error = 'Error de red: No se pudo contactar con el servidor. Revisa tu conexión o el estado del backend.';
+          this.error =
+            "Error de red: No se pudo contactar con el servidor. Revisa tu conexión o el estado del backend.";
         } else {
           this.error = `Ocurrió un error inesperado: ${err.message}`;
         }
@@ -51,22 +57,33 @@ export const useAssignmentStore = defineStore('assignments', {
       this.error = null;
 
       try {
-        const response = await apiClient.get(`/assignments/project/${projectId}`);
+        const response = await apiClient.get(
+          `/assignments/project/${projectId}`
+        );
 
         if (Array.isArray(response.data)) {
           this.assignments = response.data;
         } else {
-          console.warn('La respuesta de la API para asignaciones del proyecto no tiene el formato esperado:', response.data);
+          console.warn(
+            "La respuesta de la API para asignaciones del proyecto no tiene el formato esperado:",
+            response.data
+          );
           this.assignments = [];
-          this.error = 'El servidor devolvió un formato de datos inesperado.';
+          this.error = "El servidor devolvió un formato de datos inesperado.";
           throw new Error(this.error);
         }
       } catch (err) {
-        console.error('No se pudieron obtener las asignaciones del proyecto:', err);
+        console.error(
+          "No se pudieron obtener las asignaciones del proyecto:",
+          err
+        );
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || 'Error al cargar los datos.'}`;
+          this.error = `Error ${err.response.status}: ${
+            err.response.data.message || "Error al cargar los datos."
+          }`;
         } else if (err.request) {
-          this.error = 'Error de red: No se pudo contactar con el servidor. Revisa tu conexión o el estado del backend.';
+          this.error =
+            "Error de red: No se pudo contactar con el servidor. Revisa tu conexión o el estado del backend.";
         } else {
           this.error = `Ocurrió un error inesperado: ${err.message}`;
         }
@@ -78,7 +95,7 @@ export const useAssignmentStore = defineStore('assignments', {
 
     // Refrescar las asignaciones generales (equivale a fetchAssignments)
     async refreshData() {
-      console.log('Actualizando los datos de asignaciones...');
+      console.log("Actualizando los datos de asignaciones...");
       await this.fetchAssignments();
     },
 
@@ -90,15 +107,17 @@ export const useAssignmentStore = defineStore('assignments', {
       try {
         await apiClient.put(`/assignments/${assignmentId}/terminate`);
         // Eliminamos la asignación del estado local
-        this.assignments = this.assignments.filter(assignment => assignment.id !== assignmentId);
+        this.assignments = this.assignments.filter(
+          (assignment) => assignment.id !== assignmentId
+        );
       } catch (err) {
         if (err.response) {
           const status = err.response.status;
-          const msg = err.response.data || 'No se pudo terminar la asignación.';
+          const msg = err.response.data || "No se pudo terminar la asignación.";
           this.error = `Error ${status}: ${msg}`;
           throw new Error(msg);
         } else if (err.request) {
-          this.error = 'Error de red: No se pudo contactar con el servidor.';
+          this.error = "Error de red: No se pudo contactar con el servidor.";
           throw new Error(this.error);
         } else {
           this.error = `Ocurrió un error inesperado: ${err.message}`;
@@ -115,16 +134,20 @@ export const useAssignmentStore = defineStore('assignments', {
       this.error = null;
 
       try {
-        const response = await apiClient.post(`/assignments/${projectId}/assign/${employeeId}`);
+        const response = await apiClient.post(
+          `/assignments/${projectId}/assign/${employeeId}`
+        );
         // Actualizamos las asignaciones del proyecto luego de la operación
         await this.fetchProjectAssignments(projectId);
         return response.data;
       } catch (err) {
-        console.error('No se pudo asignar el empleado al proyecto:', err);
+        console.error("No se pudo asignar el empleado al proyecto:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || 'No se pudo asignar al empleado.'}`;
+          this.error = `Error ${err.response.status}: ${
+            err.response.data.message || "No se pudo asignar al empleado."
+          }`;
         } else if (err.request) {
-          this.error = 'Error de red: No se pudo contactar con el servidor.';
+          this.error = "Error de red: No se pudo contactar con el servidor.";
         } else {
           this.error = `Ocurrió un error inesperado: ${err.message}`;
         }
@@ -140,16 +163,20 @@ export const useAssignmentStore = defineStore('assignments', {
       this.error = null;
 
       try {
-        const response = await apiClient.delete(`/assignments/${projectId}/unassign/${employeeId}`);
+        const response = await apiClient.delete(
+          `/assignments/${projectId}/unassign/${employeeId}`
+        );
         // Actualizamos las asignaciones del proyecto luego de la operación
         await this.fetchProjectAssignments(projectId);
         return response.data;
       } catch (err) {
-        console.error('No se pudo desasignar el empleado del proyecto:', err);
+        console.error("No se pudo desasignar el empleado del proyecto:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || 'No se pudo desasignar al empleado.'}`;
+          this.error = `Error ${err.response.status}: ${
+            err.response.data.message || "No se pudo desasignar al empleado."
+          }`;
         } else if (err.request) {
-          this.error = 'Error de red: No se pudo contactar con el servidor.';
+          this.error = "Error de red: No se pudo contactar con el servidor.";
         } else {
           this.error = `Ocurrió un error inesperado: ${err.message}`;
         }
@@ -157,6 +184,6 @@ export const useAssignmentStore = defineStore('assignments', {
       } finally {
         this.isLoading = false;
       }
-    }
+    },
   },
 });

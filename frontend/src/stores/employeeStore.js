@@ -13,12 +13,12 @@ function mapEmployee(employee) {
 export const useEmployeeStore = defineStore("employees", {
   // --- Estado ---
   state: () => ({
-    employees: [],            // Lista completa de empleados
-    basicEmployees: [],       // Lista básica (solo ID y nombre)
-    isLoading: false,         // Indicador de carga
-    error: null,              // Mensaje de error
-    totalEmployees: 0,        // Total de empleados (para paginación)
-    totalPages: 0,            // Total de páginas (para paginación)
+    employees: [], // Lista completa de empleados
+    basicEmployees: [], // Lista básica (solo ID y nombre)
+    isLoading: false, // Indicador de carga
+    error: null, // Mensaje de error
+    totalEmployees: 0, // Total de empleados (para paginación)
+    totalPages: 0, // Total de páginas (para paginación)
   }),
 
   // --- Acciones ---
@@ -34,15 +34,21 @@ export const useEmployeeStore = defineStore("employees", {
         if (Array.isArray(response.data)) {
           this.employees = response.data.map(mapEmployee);
         } else {
-          console.warn("La respuesta de /employees no es un array:", response.data);
+          console.warn(
+            "La respuesta de /employees no es un array:",
+            response.data
+          );
           this.employees = [];
         }
       } catch (err) {
         console.error("No se pudieron obtener los empleados:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || "No se pudieron cargar los datos."}`;
+          this.error = `Error ${err.response.status}: ${
+            err.response.data.message || "No se pudieron cargar los datos."
+          }`;
         } else if (err.request) {
-          this.error = "Error de red: no se pudo contactar con el servidor. Verifica tu conexión o el estado del backend.";
+          this.error =
+            "Error de red: no se pudo contactar con el servidor. Verifica tu conexión o el estado del backend.";
         } else {
           this.error = `Error inesperado: ${err.message}`;
         }
@@ -69,7 +75,9 @@ export const useEmployeeStore = defineStore("employees", {
       } catch (err) {
         console.error("No se pudo añadir el empleado:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || "No se pudo añadir el empleado."}`;
+          this.error = `Error ${err.response.status}: ${
+            err.response.data.message || "No se pudo añadir el empleado."
+          }`;
         } else if (err.request) {
           this.error = "Error de red: no se pudo conectar al servidor.";
         } else {
@@ -118,13 +126,19 @@ export const useEmployeeStore = defineStore("employees", {
         if (Array.isArray(response.data)) {
           this.basicEmployees = response.data;
         } else {
-          console.warn("La respuesta de /employees/basic no es un array:", response.data);
+          console.warn(
+            "La respuesta de /employees/basic no es un array:",
+            response.data
+          );
           this.basicEmployees = [];
         }
       } catch (err) {
         console.error("No se pudieron obtener los empleados básicos:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || "No se pudo cargar la lista básica de empleados."}`;
+          this.error = `Error ${err.response.status}: ${
+            err.response.data.message ||
+            "No se pudo cargar la lista básica de empleados."
+          }`;
         } else if (err.request) {
           this.error = "Error de red: no se pudo contactar con el servidor.";
         } else {
@@ -151,7 +165,10 @@ export const useEmployeeStore = defineStore("employees", {
         if (Array.isArray(content)) {
           this.employees = content.map(mapEmployee);
         } else {
-          console.warn("El formato de respuesta de paginación es inesperado:", response.data);
+          console.warn(
+            "El formato de respuesta de paginación es inesperado:",
+            response.data
+          );
           this.employees = [];
         }
 
@@ -160,7 +177,10 @@ export const useEmployeeStore = defineStore("employees", {
       } catch (err) {
         console.error("No se pudieron obtener los empleados paginados:", err);
         if (err.response) {
-          this.error = `Error ${err.response.status}: ${err.response.data.message || "No se pudieron cargar los datos paginados."}`;
+          this.error = `Error ${err.response.status}: ${
+            err.response.data.message ||
+            "No se pudieron cargar los datos paginados."
+          }`;
         } else if (err.request) {
           this.error = "Error de red: no se pudo contactar con el servidor.";
         } else {

@@ -23,6 +23,7 @@ onMounted(() => {
   projectStore.fetchProjects();
 });
 
+
 // Función para formatear fechas al formato local
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -98,14 +99,6 @@ const formatDate = (dateString) => {
       <!-- Contenido principal de cada tarjeta -->
       <template #content="{ item: project }">
         <v-card-text class="pt-2 pb-1 project-details-text">
-          <p class="mb-1 text-body-2">
-            <v-icon
-              small
-              left
-              >mdi-calendar-start</v-icon
-            >
-            <strong>Inicio:</strong> {{ formatDate(project.startDate) }}
-          </p>
           <p
             v-if="project.endDate"
             class="text-body-2"
